@@ -7,228 +7,239 @@
 <title>Skratch-pad</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    html, body {
-        margin: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background: #090909;
-        font-family: Arial, sans-serif;
-        color: white;
-    }
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #090909;
+    font-family: Arial, sans-serif;
+    color: white;
+}
 
-    #workspace {
-        position: fixed;
-        inset: 0;
-        overflow: hidden;
-    }
+#workspace {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+}
 
-    #imageLayer,
-    #drawCanvas {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-    }
+#imageLayer,
+#drawCanvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
 
-    /* FIX: images must receive pointer events */
-    #imageLayer {
-        pointer-events: auto;
-        z-index: 2;
-    }
+/* IMAGE LAYER */
+#imageLayer {
+    z-index: 2;
+    pointer-events: auto;
+}
 
-    #drawCanvas {
-        z-index: 5;
-        touch-action: none;
-        cursor: crosshair;
-    }
+/* DRAWING CANVAS */
+#drawCanvas {
+    z-index: 5;
+    touch-action: none;
+    pointer-events: none;
+    cursor: crosshair;
+}
 
-    .image-object {
-        position: absolute;
-        transform-origin: center center;
-        user-select: none;
-        cursor: grab;
-        max-width: none;
-        border: 1px solid transparent;
-        touch-action: none;
-        pointer-events: auto;
-    }
+.image-object {
+    position: absolute;
+    transform-origin: center center;
+    user-select: none;
+    cursor: grab;
+    max-width: none;
+    border: 1px solid transparent;
+    touch-action: none;
+    pointer-events: auto;
+}
 
-    .image-object.selected {
-        border: 1px dashed rgba(255,255,255,.65);
-        box-shadow:
-            0 0 0 1px rgba(0,0,0,.5),
-            0 0 18px rgba(255,255,255,.08);
-    }
+.image-object.selected {
+    border: 1px dashed rgba(255,255,255,.65);
+    box-shadow:
+        0 0 0 1px rgba(0,0,0,.5),
+        0 0 18px rgba(255,255,255,.08);
+}
 
-    .image-object:active {
-        cursor: grabbing;
-    }
+.image-object:active {
+    cursor: grabbing;
+}
 
-    /* TITLE */
+/* TITLE */
 
-    .title {
-        position: fixed;
-        top: 22px;
-        left: 28px;
-        font-size: 22px;
-        font-weight: 600;
-        letter-spacing: .5px;
-        z-index: 20;
-        pointer-events: none;
-    }
+.title {
+    position: fixed;
+    top: 22px;
+    left: 28px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    z-index: 20;
+    pointer-events: none;
+}
 
-    /* SIDEBAR */
+/* SIDEBAR */
 
-    .toolbar {
-        position: fixed;
-        left: 18px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 58px;
-        padding: 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+.toolbar {
+    position: fixed;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 58px;
+    padding: 8px;
 
-        background: rgba(30,30,30,.65);
-        border: 1px solid rgba(255,255,255,.12);
-        border-radius: 18px;
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 
-        box-shadow: 0 10px 35px rgba(0,0,0,.35);
-        z-index: 20;
-    }
+    background: rgba(30,30,30,.65);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 18px;
 
-    .tool-btn {
-        width: 40px;
-        height: 40px;
-        border: 0;
-        border-radius: 12px;
-        background: transparent;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: background .15s ease, transform .15s ease;
-    }
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 
-    .tool-btn:hover {
-        background: rgba(255,255,255,.1);
-    }
+    box-shadow: 0 10px 35px rgba(0,0,0,.35);
 
-    .tool-btn:active {
-        transform: scale(.92);
-    }
+    z-index: 20;
+}
 
-    .tool-btn svg {
-        width: 21px;
-        height: 21px;
-        stroke: white;
-        fill: none;
-        stroke-width: 1.8;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-    }
+.tool-btn {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: white;
 
-    /* SETTINGS PANEL */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    .settings-panel {
-        position: fixed;
-        left: 86px;
-        top: 50%;
-        transform: translateY(-50%) translateX(-10px);
-        width: 230px;
-        padding: 16px;
+    cursor: pointer;
 
-        background: rgba(25,25,25,.78);
-        border: 1px solid rgba(255,255,255,.12);
-        border-radius: 16px;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+    transition:
+        background .15s ease,
+        transform .15s ease;
+}
 
-        box-shadow: 0 15px 40px rgba(0,0,0,.4);
+.tool-btn:hover {
+    background: rgba(255,255,255,.1);
+}
 
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity .2s ease, transform .2s ease;
+.tool-btn:active {
+    transform: scale(.92);
+}
 
-        z-index: 19;
-    }
+.tool-btn svg {
+    width: 21px;
+    height: 21px;
+    stroke: white;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 
-    .settings-panel.open {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translateY(-50%) translateX(0);
-    }
+/* SETTINGS */
 
-    .settings-title {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 14px;
-    }
+.settings-panel {
+    position: fixed;
+    left: 86px;
+    top: 50%;
 
-    .setting-label {
-        font-size: 12px;
-        opacity: .7;
-        margin-bottom: 7px;
-    }
+    transform:
+        translateY(-50%)
+        translateX(-10px);
 
-    .setting-group {
-        margin-bottom: 14px;
-    }
+    width: 230px;
+    padding: 16px;
 
-    input[type="range"] {
-        width: 100%;
-    }
+    background: rgba(25,25,25,.78);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px;
 
-    .setting-button {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid rgba(255,255,255,.12);
-        border-radius: 10px;
-        background: rgba(255,255,255,.06);
-        color: white;
-        cursor: pointer;
-        margin-top: 7px;
-    }
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 
-    .setting-button:hover {
-        background: rgba(255,255,255,.11);
-    }
+    box-shadow: 0 15px 40px rgba(0,0,0,.4);
 
-    .click-me-btn {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid rgba(255,255,255,.12);
-        border-radius: 10px;
-        background: rgba(255,255,255,.06);
-        color: white;
-        cursor: pointer;
-        margin-top: 7px;
-    }
+    opacity: 0;
+    pointer-events: none;
 
-    .click-me-btn:hover {
-        background: rgba(255,255,255,.11);
-    }
+    transition:
+        opacity .2s ease,
+        transform .2s ease;
 
-    .mode-text {
-        text-align: center;
-        font-size: 11px;
-        opacity: .55;
-        margin-top: 8px;
-    }
+    z-index: 19;
+}
 
-    #imageInput {
-        display: none;
-    }
+.settings-panel.open {
+    opacity: 1;
+    pointer-events: auto;
+
+    transform:
+        translateY(-50%)
+        translateX(0);
+}
+
+.settings-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.setting-label {
+    font-size: 12px;
+    opacity: .7;
+    margin-bottom: 7px;
+}
+
+.setting-group {
+    margin-bottom: 14px;
+}
+
+input[type="range"] {
+    width: 100%;
+}
+
+.setting-button,
+.click-me-btn {
+    width: 100%;
+    padding: 10px;
+
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 10px;
+
+    background: rgba(255,255,255,.06);
+    color: white;
+
+    cursor: pointer;
+    margin-top: 7px;
+}
+
+.setting-button:hover,
+.click-me-btn:hover {
+    background: rgba(255,255,255,.11);
+}
+
+.mode-text {
+    text-align: center;
+    font-size: 11px;
+    opacity: .55;
+    margin-top: 8px;
+}
+
+#imageInput {
+    display: none;
+}
 </style>
 </head>
 
@@ -261,8 +272,10 @@
             <svg id="moveIcon" viewBox="0 0 24 24">
                 <path d="M12 2v20"></path>
                 <path d="M2 12h20"></path>
+
                 <path d="M8 6l4-4 4 4"></path>
                 <path d="M8 18l4 4 4-4"></path>
+
                 <path d="M6 8l-4 4 4 4"></path>
                 <path d="M18 8l4 4-4 4"></path>
             </svg>
@@ -279,7 +292,8 @@
         <button class="tool-btn" id="settingsBtn" title="Settings">
             <svg viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.5v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6v-2.5h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L9 6.7l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V5h2.5v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1v2.5h-.1a1.7 1.7 0 0 0-1.5 1z"></path>
+
+                <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.5v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6v-2.5h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L9 6.7l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V5h2.5v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1v2.5h-.1a1.7 1.7 0 0 0-1.5 1z"></path>
             </svg>
         </button>
 
@@ -288,11 +302,15 @@
     <!-- SETTINGS PANEL -->
     <div class="settings-panel" id="settingsPanel">
 
-        <div class="settings-title">Settings</div>
+        <div class="settings-title">
+            Settings
+        </div>
 
         <div class="setting-group">
+
             <div class="setting-label">
-                Brush size: <span id="sizeValue">5</span>px
+                Brush size:
+                <span id="sizeValue">5</span>px
             </div>
 
             <input
@@ -302,6 +320,7 @@
                 max="50"
                 value="5"
             >
+
         </div>
 
         <button class="setting-button" id="removeImageBtn">
@@ -336,224 +355,362 @@
 
 <script>
 
-const workspace = document.getElementById("workspace");
-const imageLayer = document.getElementById("imageLayer");
-const drawCanvas = document.getElementById("drawCanvas");
+/* ---------------- ELEMENTS ---------------- */
 
-const addImageBtn = document.getElementById("addImageBtn");
-const imageInput = document.getElementById("imageInput");
+const workspace =
+    document.getElementById("workspace");
 
-const modeBtn = document.getElementById("modeBtn");
-const moveIcon = document.getElementById("moveIcon");
-const pencilIcon = document.getElementById("pencilIcon");
-const modeLabel = document.getElementById("modeLabel");
+const imageLayer =
+    document.getElementById("imageLayer");
 
-const settingsBtn = document.getElementById("settingsBtn");
-const settingsPanel = document.getElementById("settingsPanel");
+const drawCanvas =
+    document.getElementById("drawCanvas");
 
-const brushSize = document.getElementById("brushSize");
-const sizeValue = document.getElementById("sizeValue");
+const ctx =
+    drawCanvas.getContext("2d");
 
-const removeImageBtn = document.getElementById("removeImageBtn");
-const clearDrawingsBtn = document.getElementById("clearDrawingsBtn");
-const downloadBtn = document.getElementById("downloadBtn");
-const clickMeBtn = document.getElementById("clickMeBtn");
+const addImageBtn =
+    document.getElementById("addImageBtn");
 
-const ctx = drawCanvas.getContext("2d");
+const imageInput =
+    document.getElementById("imageInput");
+
+const modeBtn =
+    document.getElementById("modeBtn");
+
+const moveIcon =
+    document.getElementById("moveIcon");
+
+const pencilIcon =
+    document.getElementById("pencilIcon");
+
+const modeLabel =
+    document.getElementById("modeLabel");
+
+const settingsBtn =
+    document.getElementById("settingsBtn");
+
+const settingsPanel =
+    document.getElementById("settingsPanel");
+
+const brushSize =
+    document.getElementById("brushSize");
+
+const sizeValue =
+    document.getElementById("sizeValue");
+
+const removeImageBtn =
+    document.getElementById("removeImageBtn");
+
+const clearDrawingsBtn =
+    document.getElementById("clearDrawingsBtn");
+
+const downloadBtn =
+    document.getElementById("downloadBtn");
+
+const clickMeBtn =
+    document.getElementById("clickMeBtn");
+
+
+/* ---------------- VARIABLES ---------------- */
 
 let mode = "move";
 
 let brush = 5;
 
 let selectedImage = null;
+
 let imageCounter = 0;
 
 let movingImage = false;
+
 let moveStartX = 0;
 let moveStartY = 0;
+
 let originalImageX = 0;
 let originalImageY = 0;
 
 let drawing = false;
 
 
-/* ---------------- CANVAS ---------------- */
+/* ---------------- CANVAS SIZE ---------------- */
 
 function resizeCanvas() {
 
-    const oldCanvas = document.createElement("canvas");
+    const oldWidth =
+        drawCanvas.width;
 
-    oldCanvas.width = drawCanvas.width;
-    oldCanvas.height = drawCanvas.height;
+    const oldHeight =
+        drawCanvas.height;
 
-    if (oldCanvas.width && oldCanvas.height) {
-        oldCanvas.getContext("2d").drawImage(drawCanvas, 0, 0);
+    let oldImage = null;
+
+    if (oldWidth > 0 && oldHeight > 0) {
+
+        oldImage =
+            document.createElement("canvas");
+
+        oldImage.width =
+            oldWidth;
+
+        oldImage.height =
+            oldHeight;
+
+        const oldCtx =
+            oldImage.getContext("2d");
+
+        oldCtx.drawImage(
+            drawCanvas,
+            0,
+            0
+        );
     }
 
-    drawCanvas.width = window.innerWidth;
-    drawCanvas.height = window.innerHeight;
+    drawCanvas.width =
+        window.innerWidth;
 
-    if (oldCanvas.width && oldCanvas.height) {
-        ctx.drawImage(oldCanvas, 0, 0);
+    drawCanvas.height =
+        window.innerHeight;
+
+    if (oldImage) {
+
+        ctx.drawImage(
+            oldImage,
+            0,
+            0
+        );
     }
 }
 
 resizeCanvas();
 
-/*
-    IMPORTANT:
-    Start in move mode so the images receive pointer events.
-*/
-drawCanvas.style.pointerEvents = "none";
-
-
-window.addEventListener("resize", () => {
-    resizeCanvas();
-});
-
-
-/* ---------------- SETTINGS ---------------- */
-
-settingsBtn.addEventListener("click", () => {
-    settingsPanel.classList.toggle("open");
-});
-
-
-/* ---------------- BRUSH ---------------- */
-
-brushSize.addEventListener("input", () => {
-
-    brush = Number(brushSize.value);
-
-    sizeValue.textContent = brush;
-});
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
 
 
 /* ---------------- MODE ---------------- */
 
-modeBtn.addEventListener("click", () => {
+function setMode(newMode) {
 
-    if (mode === "move") {
+    mode = newMode;
 
-        mode = "draw";
+    movingImage = false;
+    drawing = false;
 
-        moveIcon.style.display = "none";
-        pencilIcon.style.display = "block";
-
-        modeLabel.textContent = "Draw mode";
+    if (mode === "draw") {
 
         /*
-            Draw canvas receives pointer events.
+            DRAW MODE:
+            Drawing canvas goes above images.
         */
-        drawCanvas.style.pointerEvents = "auto";
+
+        drawCanvas.style.zIndex = "10";
+        imageLayer.style.zIndex = "2";
+
+        drawCanvas.style.pointerEvents =
+            "auto";
+
+        moveIcon.style.display =
+            "none";
+
+        pencilIcon.style.display =
+            "block";
+
+        modeLabel.textContent =
+            "Draw mode";
 
     } else {
 
-        mode = "move";
-
-        moveIcon.style.display = "block";
-        pencilIcon.style.display = "none";
-
-        modeLabel.textContent = "Move mode";
-
         /*
-            Disable the drawing canvas so images underneath
-            can receive pointer events.
+            MOVE MODE:
+            Images go above drawing canvas.
         */
-        drawCanvas.style.pointerEvents = "none";
-    }
 
-});
+        drawCanvas.style.zIndex = "1";
+        imageLayer.style.zIndex = "10";
+
+        drawCanvas.style.pointerEvents =
+            "none";
+
+        moveIcon.style.display =
+            "block";
+
+        pencilIcon.style.display =
+            "none";
+
+        modeLabel.textContent =
+            "Move mode";
+    }
+}
+
+setMode("move");
+
+
+modeBtn.addEventListener(
+    "click",
+    () => {
+
+        if (mode === "move") {
+            setMode("draw");
+        } else {
+            setMode("move");
+        }
+
+    }
+);
+
+
+/* ---------------- SETTINGS ---------------- */
+
+settingsBtn.addEventListener(
+    "click",
+    () => {
+
+        settingsPanel.classList.toggle(
+            "open"
+        );
+
+    }
+);
+
+
+/* ---------------- BRUSH SIZE ---------------- */
+
+brushSize.addEventListener(
+    "input",
+    () => {
+
+        brush =
+            Number(brushSize.value);
+
+        sizeValue.textContent =
+            brush;
+
+    }
+);
 
 
 /* ---------------- ADD IMAGE ---------------- */
 
-addImageBtn.addEventListener("click", () => {
-    imageInput.click();
-});
+addImageBtn.addEventListener(
+    "click",
+    () => {
+
+        imageInput.click();
+
+    }
+);
 
 
-imageInput.addEventListener("change", (e) => {
+imageInput.addEventListener(
+    "change",
+    (e) => {
 
-    const file = e.target.files[0];
+        const file =
+            e.target.files[0];
 
-    if (!file) return;
+        if (!file) return;
 
-    const reader = new FileReader();
+        const reader =
+            new FileReader();
 
-    reader.onload = (event) => {
+        reader.onload =
+            (event) => {
 
-        createImage(event.target.result);
+                createImage(
+                    event.target.result
+                );
 
-    };
+            };
 
-    reader.readAsDataURL(file);
+        reader.readAsDataURL(file);
 
-    imageInput.value = "";
-});
+        imageInput.value = "";
+    }
+);
 
 
 /* ---------------- CREATE IMAGE ---------------- */
 
 function createImage(src) {
 
-    const img = document.createElement("img");
+    const img =
+        document.createElement("img");
 
-    img.className = "image-object";
+    img.className =
+        "image-object";
 
-    img.src = src;
+    img.src =
+        src;
 
-    img.draggable = false;
+    img.draggable =
+        false;
 
-    img.dataset.id = ++imageCounter;
+    img.dataset.id =
+        ++imageCounter;
 
     imageLayer.appendChild(img);
 
 
-    img.onload = () => {
+    img.onload =
+        () => {
 
-        let width = img.naturalWidth;
-        let height = img.naturalHeight;
+            let width =
+                img.naturalWidth;
 
-        const maxWidth = window.innerWidth * .7;
-        const maxHeight = window.innerHeight * .7;
+            let height =
+                img.naturalHeight;
 
-        let scale = 1;
+            const maxWidth =
+                window.innerWidth * .7;
 
-        if (width > maxWidth) {
-            scale = maxWidth / width;
-        }
+            const maxHeight =
+                window.innerHeight * .7;
 
-        if (height * scale > maxHeight) {
-            scale = maxHeight / height;
-        }
+            let scale = 1;
 
-        width *= scale;
-        height *= scale;
+            if (width > maxWidth) {
 
-        img.style.width = width + "px";
-        img.style.height = height + "px";
+                scale =
+                    maxWidth / width;
+            }
 
-        img.dataset.x =
-            (window.innerWidth - width) / 2;
+            if (height * scale > maxHeight) {
 
-        img.dataset.y =
-            (window.innerHeight - height) / 2;
+                scale =
+                    maxHeight / height;
+            }
 
-        img.dataset.scale = 1;
+            width *= scale;
+            height *= scale;
 
-        updateImage(img);
+            img.style.width =
+                width + "px";
 
-        selectImage(img);
-    };
+            img.style.height =
+                height + "px";
+
+            img.dataset.x =
+                (window.innerWidth - width) / 2;
+
+            img.dataset.y =
+                (window.innerHeight - height) / 2;
+
+            img.dataset.scale =
+                1;
+
+            updateImage(img);
+
+            selectImage(img);
+        };
 
 
-    /*
-        IMPORTANT:
-        The image itself listens for pointerdown.
-    */
-    img.addEventListener("pointerdown", imagePointerDown);
-
+    img.addEventListener(
+        "pointerdown",
+        imagePointerDown
+    );
 }
 
 
@@ -561,15 +718,23 @@ function createImage(src) {
 
 function updateImage(img) {
 
-    const x = Number(img.dataset.x);
-    const y = Number(img.dataset.y);
+    const x =
+        Number(img.dataset.x);
 
-    const scale = Number(img.dataset.scale);
+    const y =
+        Number(img.dataset.y);
 
-    img.style.left = x + "px";
-    img.style.top = y + "px";
+    const scale =
+        Number(img.dataset.scale);
 
-    img.style.transform = `scale(${scale})`;
+    img.style.left =
+        x + "px";
+
+    img.style.top =
+        y + "px";
+
+    img.style.transform =
+        `scale(${scale})`;
 }
 
 
@@ -578,291 +743,413 @@ function updateImage(img) {
 function selectImage(img) {
 
     if (selectedImage) {
-        selectedImage.classList.remove("selected");
+
+        selectedImage.classList.remove(
+            "selected"
+        );
     }
 
-    selectedImage = img;
+    selectedImage =
+        img;
 
     if (selectedImage) {
-        selectedImage.classList.add("selected");
+
+        selectedImage.classList.add(
+            "selected"
+        );
     }
 }
 
 
-/* ---------------- IMAGE MOVEMENT ---------------- */
+/* ---------------- IMAGE DOWN ---------------- */
 
 function imagePointerDown(e) {
 
-    if (mode !== "move") return;
+    if (mode !== "move") {
+        return;
+    }
 
-    /*
-        Prevent the event from reaching anything else.
-    */
+    e.preventDefault();
     e.stopPropagation();
 
-    const img = e.currentTarget;
+    const img =
+        e.currentTarget;
 
     selectImage(img);
 
-    movingImage = true;
+    movingImage =
+        true;
 
-    moveStartX = e.clientX;
-    moveStartY = e.clientY;
+    moveStartX =
+        e.clientX;
 
-    originalImageX = Number(img.dataset.x);
-    originalImageY = Number(img.dataset.y);
+    moveStartY =
+        e.clientY;
 
-    /*
-        Capture the pointer so dragging continues
-        even if the pointer leaves the image.
-    */
+    originalImageX =
+        Number(img.dataset.x);
+
+    originalImageY =
+        Number(img.dataset.y);
+
     try {
-        img.setPointerCapture(e.pointerId);
+
+        img.setPointerCapture(
+            e.pointerId
+        );
+
     } catch {}
 }
 
 
-/* ---------------- MOVE IMAGE ---------------- */
+/* ---------------- IMAGE MOVE ---------------- */
 
-document.addEventListener("pointermove", (e) => {
+document.addEventListener(
+    "pointermove",
+    (e) => {
 
-    if (!movingImage) return;
+        if (!movingImage) {
+            return;
+        }
 
-    if (!selectedImage) return;
+        if (!selectedImage) {
+            return;
+        }
 
-    if (mode !== "move") return;
+        if (mode !== "move") {
+            return;
+        }
 
-    const dx = e.clientX - moveStartX;
-    const dy = e.clientY - moveStartY;
+        const dx =
+            e.clientX - moveStartX;
 
-    selectedImage.dataset.x =
-        originalImageX + dx;
+        const dy =
+            e.clientY - moveStartY;
 
-    selectedImage.dataset.y =
-        originalImageY + dy;
+        selectedImage.dataset.x =
+            originalImageX + dx;
 
-    updateImage(selectedImage);
+        selectedImage.dataset.y =
+            originalImageY + dy;
 
-});
+        updateImage(
+            selectedImage
+        );
+
+    }
+);
 
 
 /* ---------------- STOP MOVING ---------------- */
 
-document.addEventListener("pointerup", () => {
+document.addEventListener(
+    "pointerup",
+    () => {
 
-    movingImage = false;
+        movingImage =
+            false;
 
-});
+    }
+);
 
+document.addEventListener(
+    "pointercancel",
+    () => {
 
-document.addEventListener("pointercancel", () => {
+        movingImage =
+            false;
 
-    movingImage = false;
-
-});
+    }
+);
 
 
 /* ---------------- IMAGE RESIZE ---------------- */
 
-workspace.addEventListener("wheel", (e) => {
+workspace.addEventListener(
+    "wheel",
+    (e) => {
 
-    if (mode !== "move") return;
+        if (mode !== "move") {
+            return;
+        }
 
-    if (!selectedImage) return;
+        if (!selectedImage) {
+            return;
+        }
 
-    e.preventDefault();
+        e.preventDefault();
 
-    let scale =
-        Number(selectedImage.dataset.scale);
+        let scale =
+            Number(
+                selectedImage.dataset.scale
+            );
 
-    if (e.deltaY < 0) {
-        scale += .05;
-    } else {
-        scale -= .05;
+        if (e.deltaY < 0) {
+            scale += .05;
+        } else {
+            scale -= .05;
+        }
+
+        scale =
+            Math.max(
+                .1,
+                Math.min(5, scale)
+            );
+
+        selectedImage.dataset.scale =
+            scale;
+
+        updateImage(
+            selectedImage
+        );
+
+    },
+    {
+        passive: false
     }
-
-    scale = Math.max(.1, Math.min(5, scale));
-
-    selectedImage.dataset.scale = scale;
-
-    updateImage(selectedImage);
-
-}, { passive: false });
+);
 
 
 /* ---------------- DRAWING ---------------- */
 
-drawCanvas.addEventListener("pointerdown", (e) => {
+drawCanvas.addEventListener(
+    "pointerdown",
+    (e) => {
 
-    if (mode !== "draw") return;
+        if (mode !== "draw") {
+            return;
+        }
 
-    drawing = true;
+        e.preventDefault();
 
-    ctx.beginPath();
+        drawing = true;
 
-    ctx.moveTo(e.clientX, e.clientY);
+        drawCanvas.setPointerCapture(
+            e.pointerId
+        );
 
-    ctx.lineWidth = brush;
+        ctx.beginPath();
 
-    ctx.lineCap = "round";
+        ctx.moveTo(
+            e.clientX,
+            e.clientY
+        );
 
-    ctx.lineJoin = "round";
+        ctx.lineWidth =
+            brush;
 
-});
+        ctx.lineCap =
+            "round";
 
+        ctx.lineJoin =
+            "round";
 
-drawCanvas.addEventListener("pointermove", (e) => {
-
-    if (!drawing) return;
-
-    if (mode !== "draw") return;
-
-    ctx.lineTo(e.clientX, e.clientY);
-
-    ctx.strokeStyle = "#ffffff";
-
-    ctx.stroke();
-
-});
+        ctx.strokeStyle =
+            "#ffffff";
+    }
+);
 
 
-drawCanvas.addEventListener("pointerup", () => {
+drawCanvas.addEventListener(
+    "pointermove",
+    (e) => {
+
+        if (!drawing) {
+            return;
+        }
+
+        if (mode !== "draw") {
+            return;
+        }
+
+        e.preventDefault();
+
+        ctx.lineTo(
+            e.clientX,
+            e.clientY
+        );
+
+        ctx.stroke();
+    }
+);
+
+
+function stopDrawing() {
+
+    if (!drawing) {
+        return;
+    }
 
     drawing = false;
 
     ctx.closePath();
+}
 
-});
 
+drawCanvas.addEventListener(
+    "pointerup",
+    stopDrawing
+);
 
-drawCanvas.addEventListener("pointercancel", () => {
+drawCanvas.addEventListener(
+    "pointercancel",
+    stopDrawing
+);
 
-    drawing = false;
-
-    ctx.closePath();
-
-});
+drawCanvas.addEventListener(
+    "lostpointercapture",
+    stopDrawing
+);
 
 
 /* ---------------- REMOVE IMAGE ---------------- */
 
-removeImageBtn.addEventListener("click", () => {
+removeImageBtn.addEventListener(
+    "click",
+    () => {
 
-    if (!selectedImage) return;
+        if (!selectedImage) {
+            return;
+        }
 
-    selectedImage.remove();
+        selectedImage.remove();
 
-    selectedImage = null;
-
-});
+        selectedImage =
+            null;
+    }
+);
 
 
 /* ---------------- CLEAR DRAWINGS ---------------- */
 
-clearDrawingsBtn.addEventListener("click", () => {
+clearDrawingsBtn.addEventListener(
+    "click",
+    () => {
 
-    ctx.clearRect(
-        0,
-        0,
-        drawCanvas.width,
-        drawCanvas.height
-    );
+        ctx.clearRect(
+            0,
+            0,
+            drawCanvas.width,
+            drawCanvas.height
+        );
 
-});
+    }
+);
 
 
 /* ---------------- DOWNLOAD ---------------- */
 
-downloadBtn.addEventListener("click", () => {
+downloadBtn.addEventListener(
+    "click",
+    () => {
 
-    const output = document.createElement("canvas");
+        const output =
+            document.createElement("canvas");
 
-    output.width = window.innerWidth;
-    output.height = window.innerHeight;
+        output.width =
+            window.innerWidth;
 
-    const outputCtx = output.getContext("2d");
+        output.height =
+            window.innerHeight;
 
-    /*
-        Dark background.
-    */
-    outputCtx.fillStyle = "#090909";
-
-    outputCtx.fillRect(
-        0,
-        0,
-        output.width,
-        output.height
-    );
+        const outputCtx =
+            output.getContext("2d");
 
 
-    /*
-        Draw all images.
-    */
-    const images =
-        imageLayer.querySelectorAll(".image-object");
+        outputCtx.fillStyle =
+            "#090909";
 
-    images.forEach(img => {
-
-        const x = Number(img.dataset.x);
-        const y = Number(img.dataset.y);
-        const scale = Number(img.dataset.scale);
-
-        const width = img.offsetWidth;
-        const height = img.offsetHeight;
-
-        outputCtx.save();
-
-        outputCtx.translate(
-            x + width / 2,
-            y + height / 2
+        outputCtx.fillRect(
+            0,
+            0,
+            output.width,
+            output.height
         );
 
-        outputCtx.scale(scale, scale);
+
+        const images =
+            imageLayer.querySelectorAll(
+                ".image-object"
+            );
+
+
+        images.forEach(
+            (img) => {
+
+                const x =
+                    Number(img.dataset.x);
+
+                const y =
+                    Number(img.dataset.y);
+
+                const scale =
+                    Number(img.dataset.scale);
+
+                const width =
+                    img.offsetWidth;
+
+                const height =
+                    img.offsetHeight;
+
+                outputCtx.save();
+
+                outputCtx.translate(
+                    x + width / 2,
+                    y + height / 2
+                );
+
+                outputCtx.scale(
+                    scale,
+                    scale
+                );
+
+                outputCtx.drawImage(
+                    img,
+                    -width / 2,
+                    -height / 2,
+                    width,
+                    height
+                );
+
+                outputCtx.restore();
+            }
+        );
+
 
         outputCtx.drawImage(
-            img,
-            -width / 2,
-            -height / 2,
-            width,
-            height
+            drawCanvas,
+            0,
+            0
         );
 
-        outputCtx.restore();
 
-    });
+        const link =
+            document.createElement("a");
 
+        link.download =
+            "skratch-pad-edit.png";
 
-    /*
-        Draw the drawings on top.
-    */
-    outputCtx.drawImage(
-        drawCanvas,
-        0,
-        0
-    );
+        link.href =
+            output.toDataURL(
+                "image/png"
+            );
 
-
-    const link =
-        document.createElement("a");
-
-    link.download =
-        "skratch-pad-edit.png";
-
-    link.href =
-        output.toDataURL("image/png");
-
-    link.click();
-
-});
+        link.click();
+    }
+);
 
 
 /* ---------------- CLICK ME ---------------- */
 
-clickMeBtn.addEventListener("click", () => {
+clickMeBtn.addEventListener(
+    "click",
+    () => {
 
-    window.location.href = "index.html";
+        window.location.href =
+            "index.html";
 
-});
+    }
+);
 
 </script>
 
