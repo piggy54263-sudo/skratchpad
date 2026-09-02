@@ -3,28 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimalist Draw | GitHub</title>
-  <!-- 100% Free Google Material Outlined Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <title>Minimal Scratchpad</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+  <!-- The black drawing board -->
   <canvas id="scratchpad"></canvas>
 
+  <!-- The minimalistic floating menu -->
   <div class="toolbar">
-    <button id="colorBtn" class="icon-button active" title="Choose Color">
-      <span class="material-symbols-outlined">palette</span>
-      <input type="color" id="colorPicker" value="#ffffff">
-    </button>
+    <!-- The palette icon wrapped around the color input -->
+    <div class="icon-wrapper" title="Choose Color">
+      🎨 <input type="color" id="colorPicker" value="#ffffff">
+    </div>
     
-    <button id="eraserBtn" class="icon-button" title="Eraser">
-      <span class="material-symbols-outlined">ink_eraser</span>
-    </button>
-    
-    <button id="settingsBtn" class="icon-button" title="Settings">
-      <span class="material-symbols-outlined">settings</span>
-    </button>
+    <!-- The settings icon -->
+    <button id="settingsBtn" title="Settings">⚙️</button>
   </div>
 
   <script src="script.js"></script>
