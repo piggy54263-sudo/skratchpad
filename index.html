@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Minimalist Scratchpad</title>
+  <!-- Google Material Outlined Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <style>
-    /* Reset and layout */
+    /* Reset and Layout */
     body, html {
       margin: 0;
       padding: 0;
@@ -17,12 +18,12 @@
       font-family: 'Segoe UI', Tahoma, sans-serif;
     }
 
-    /* CRITICAL FIX: touch-action: none stops browser drag/scroll interference */
+    /* Canvas setup with touch-action none to prevent scroll interference */
     canvas {
       display: block;
       width: 100vw;
       height: 100vh;
-      touch-action: none; 
+      touch-action: none;
     }
 
     /* Minimalistic Floating Toolbar */
@@ -32,21 +33,23 @@
       right: 25px;
       display: flex;
       gap: 15px;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 12px;
-      border-radius: 15px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      z-index: 10; /* Ensures toolbar stays clickable above canvas */
+      background: rgba(255, 255, 255, 0.08);
+      padding: 10px 14px;
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      z-index: 10;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     }
 
+    /* Button Styling */
     .icon-button {
       background: none;
       border: 1px solid transparent;
-      font-size: 26px;
+      font-size: 24px;
       cursor: pointer;
-      padding: 10px;
-      border-radius: 10px;
+      padding: 8px;
+      border-radius: 12px;
       transition: all 0.2s ease;
       color: #ffffff;
       display: flex;
@@ -57,10 +60,11 @@
 
     .icon-button:hover, .icon-button.active {
       border-color: rgba(255, 255, 255, 0.8);
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.1);
       transform: translateY(-2px);
     }
 
+    /* Palette Icon & Hidden Color Wheel Wrapper */
     #colorBtn span {
       position: absolute;
       pointer-events: none;
@@ -77,8 +81,10 @@
 </head>
 <body>
 
+  <!-- Drawing Canvas -->
   <canvas id="scratchpad"></canvas>
 
+  <!-- Minimalist Toolbar -->
   <div class="toolbar">
     <button id="colorBtn" class="icon-button active" title="Choose Color">
       <span class="material-symbols-outlined">palette</span>
@@ -100,7 +106,7 @@
     const eraserBtn = document.getElementById('eraserBtn');
     const settingsBtn = document.getElementById('settingsBtn');
 
-    // Set high-res canvas dimensions
+    // Handle high-res full screen scaling
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -112,6 +118,7 @@
     let currentTool = 'brush'; 
     let currentColor = colorPicker.value;
 
+    // Tool Switching Logic
     function setActiveTool(tool) {
       currentTool = tool;
       document.querySelectorAll('.icon-button').forEach(btn => btn.classList.remove('active'));
@@ -122,11 +129,12 @@
     colorBtn.addEventListener('click', () => setActiveTool('brush'));
     colorPicker.addEventListener('input', (e) => {
       currentColor = e.target.value;
-      if (currentTool === 'brush') setActiveTool('brush');
+      setActiveTool('brush');
     });
     eraserBtn.addEventListener('click', () => setActiveTool('eraser'));
-    settingsBtn.addEventListener('click', () => alert("Settings menu coming up next!"));
+    settingsBtn.addEventListener('click', () => alert("Settings menu: Ready for customization!"));
 
+    // Coordinate mapping for mouse & touch
     function getCoordinates(e) {
       if (e.touches && e.touches.length > 0) {
         return { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -134,6 +142,7 @@
       return { x: e.clientX, y: e.clientY };
     }
 
+    // Drawing Functions
     function startDrawing(e) {
       isDrawing = true;
       const coords = getCoordinates(e);
@@ -143,11 +152,11 @@
       ctx.lineCap = 'round';
       
       if (currentTool === 'eraser') {
-        ctx.strokeStyle = '#000000'; // Matches background
-        ctx.lineWidth = 20; 
+        ctx.strokeStyle = '#000000'; // Blends into the black background
+        ctx.lineWidth = 24;          // Wider stroke for easy erasing
       } else {
         ctx.strokeStyle = currentColor; 
-        ctx.lineWidth = 4; 
+        ctx.lineWidth = 4;           // Clean standard brush size
       }
 
       ctx.lineTo(coords.x, coords.y);
@@ -166,19 +175,15 @@
       ctx.closePath();
     }
 
-    // Mouse Events
+    // Mouse Event Listeners
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseleave', stopDrawing);
 
-    // Touch Events
-    canvas.addEventListener('touchstart', (e) => {
-      startDrawing(e);
-    });
-    canvas.addEventListener('touchmove', (e) => {
-      draw(e);
-    });
+    // Touch Event Listeners (for phones/tablets)
+    canvas.addEventListener('touchstart', (e) => startDrawing(e));
+    canvas.addEventListener('touchmove', (e) => draw(e));
     canvas.addEventListener('touchend', stopDrawing);
     canvas.addEventListener('touchcancel', stopDrawing);
   </script>
