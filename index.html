@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Scratchpad</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- The black drawing board -->
+  <canvas id="scratchpad"></canvas>
+
+  <!-- The minimalistic floating menu -->
+  <div class="toolbar">
+    <!-- The palette icon wrapped around the color input -->
+    <div class="icon-wrapper" title="Choose Color">
+      🎨 <input type="color" id="colorPicker" value="#ffffff">
+    </div>
+    
+    <!-- The settings icon -->
+    <button id="settingsBtn" title="Settings">⚙️</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
