@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimal Scratchpad</title>
+  <title>Minimalist Draw | GitHub</title>
+  <!-- Link to FontAwesome for the cool outlined icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,15 +13,23 @@
   <!-- The black drawing board -->
   <canvas id="scratchpad"></canvas>
 
-  <!-- The minimalistic floating menu -->
+  <!-- The floating minimalistic menu -->
   <div class="toolbar">
-    <!-- The palette icon wrapped around the color input -->
-    <div class="icon-wrapper" title="Choose Color">
-      🎨 <input type="color" id="colorPicker" value="#ffffff">
-    </div>
+    <!-- NEW: Palette Icon with Hidden Color Picker -->
+    <button id="colorBtn" class="icon-button" title="Choose Color">
+      <i class="far fa-palette"></i> <!-- Far = FontAwesome Regular (outlined) -->
+      <input type="color" id="colorPicker" value="#ffffff">
+    </button>
     
-    <!-- The settings icon -->
-    <button id="settingsBtn" title="Settings">⚙️</button>
+    <!-- NEW: The Eraser Icon Button -->
+    <button id="eraserBtn" class="icon-button" title="Eraser">
+      <i class="far fa-eraser"></i>
+    </button>
+    
+    <!-- Updated Settings Icon (now outlined) -->
+    <button id="settingsBtn" class="icon-button" title="Settings">
+      <i class="far fa-gear"></i>
+    </button>
   </div>
 
   <script src="script.js"></script>
