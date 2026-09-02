@@ -36,33 +36,41 @@ html, body {
     height: 100%;
 }
 
-/* IMAGE LAYER */
 #imageLayer {
-    z-index: 2;
+    z-index: 10;
     pointer-events: auto;
 }
 
-/* DRAWING CANVAS */
 #drawCanvas {
-    z-index: 5;
+    z-index: 1;
     touch-action: none;
     pointer-events: none;
     cursor: crosshair;
 }
 
-.image-object {
+
+/* IMAGE */
+
+.image-container {
     position: absolute;
     transform-origin: center center;
     user-select: none;
-    cursor: grab;
+    touch-action: none;
+}
+
+.image-object {
+    display: block;
+    user-select: none;
+    pointer-events: auto;
     max-width: none;
     border: 1px solid transparent;
     touch-action: none;
-    pointer-events: auto;
+    cursor: grab;
 }
 
-.image-object.selected {
+.image-container.selected .image-object {
     border: 1px dashed rgba(255,255,255,.65);
+
     box-shadow:
         0 0 0 1px rgba(0,0,0,.5),
         0 0 18px rgba(255,255,255,.08);
@@ -72,26 +80,62 @@ html, body {
     cursor: grabbing;
 }
 
+
+/* RESIZE HANDLE */
+
+.resize-handle {
+    position: absolute;
+
+    right: -7px;
+    bottom: -7px;
+
+    width: 15px;
+    height: 15px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    border: 2px solid #111;
+
+    cursor: nwse-resize;
+
+    display: none;
+
+    z-index: 20;
+}
+
+.image-container.selected .resize-handle {
+    display: block;
+}
+
+
 /* TITLE */
 
 .title {
     position: fixed;
     top: 22px;
     left: 28px;
+
     font-size: 22px;
     font-weight: 600;
     letter-spacing: .5px;
-    z-index: 20;
+
+    z-index: 30;
     pointer-events: none;
 }
+
 
 /* SIDEBAR */
 
 .toolbar {
     position: fixed;
+
     left: 18px;
     top: 50%;
+
     transform: translateY(-50%);
+
     width: 58px;
     padding: 8px;
 
@@ -100,22 +144,27 @@ html, body {
     gap: 8px;
 
     background: rgba(30,30,30,.65);
+
     border: 1px solid rgba(255,255,255,.12);
+
     border-radius: 18px;
 
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
 
-    box-shadow: 0 10px 35px rgba(0,0,0,.35);
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.35);
 
-    z-index: 20;
+    z-index: 30;
 }
 
 .tool-btn {
     width: 40px;
     height: 40px;
+
     border: 0;
     border-radius: 12px;
+
     background: transparent;
     color: white;
 
@@ -141,17 +190,21 @@ html, body {
 .tool-btn svg {
     width: 21px;
     height: 21px;
+
     stroke: white;
     fill: none;
+
     stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
 
+
 /* SETTINGS */
 
 .settings-panel {
     position: fixed;
+
     left: 86px;
     top: 50%;
 
@@ -163,13 +216,16 @@ html, body {
     padding: 16px;
 
     background: rgba(25,25,25,.78);
+
     border: 1px solid rgba(255,255,255,.12);
+
     border-radius: 16px;
 
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 
-    box-shadow: 0 15px 40px rgba(0,0,0,.4);
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.4);
 
     opacity: 0;
     pointer-events: none;
@@ -178,7 +234,7 @@ html, body {
         opacity .2s ease,
         transform .2s ease;
 
-    z-index: 19;
+    z-index: 29;
 }
 
 .settings-panel.open {
@@ -193,12 +249,14 @@ html, body {
 .settings-title {
     font-size: 14px;
     font-weight: 600;
+
     margin-bottom: 14px;
 }
 
 .setting-label {
     font-size: 12px;
     opacity: .7;
+
     margin-bottom: 7px;
 }
 
@@ -213,15 +271,19 @@ input[type="range"] {
 .setting-button,
 .click-me-btn {
     width: 100%;
+
     padding: 10px;
 
     border: 1px solid rgba(255,255,255,.12);
+
     border-radius: 10px;
 
     background: rgba(255,255,255,.06);
+
     color: white;
 
     cursor: pointer;
+
     margin-top: 7px;
 }
 
@@ -232,14 +294,18 @@ input[type="range"] {
 
 .mode-text {
     text-align: center;
+
     font-size: 11px;
+
     opacity: .55;
+
     margin-top: 8px;
 }
 
 #imageInput {
     display: none;
 }
+
 </style>
 </head>
 
@@ -247,70 +313,157 @@ input[type="range"] {
 
 <div id="workspace">
 
-    <div class="title">Skratch-pad</div>
+    <div class="title">
+        Skratch-pad
+    </div>
 
     <div id="imageLayer"></div>
 
     <canvas id="drawCanvas"></canvas>
 
+
     <!-- SIDEBAR -->
+
     <div class="toolbar">
 
         <!-- ADD IMAGE -->
-        <button class="tool-btn" id="addImageBtn" title="Add image">
+
+        <button
+            class="tool-btn"
+            id="addImageBtn"
+            title="Add image"
+        >
+
             <svg viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="3"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <path d="M21 15l-5-5L5 21"></path>
+
+                <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="3"
+                ></rect>
+
+                <circle
+                    cx="8.5"
+                    cy="8.5"
+                    r="1.5"
+                ></circle>
+
+                <path
+                    d="M21 15l-5-5L5 21"
+                ></path>
+
             </svg>
+
         </button>
+
 
         <!-- MODE -->
-        <button class="tool-btn" id="modeBtn" title="Switch mode">
 
-            <!-- MOVE ICON -->
-            <svg id="moveIcon" viewBox="0 0 24 24">
+        <button
+            class="tool-btn"
+            id="modeBtn"
+            title="Switch mode"
+        >
+
+            <!-- MOVE -->
+
+            <svg
+                id="moveIcon"
+                viewBox="0 0 24 24"
+            >
+
                 <path d="M12 2v20"></path>
+
                 <path d="M2 12h20"></path>
 
-                <path d="M8 6l4-4 4 4"></path>
-                <path d="M8 18l4 4 4-4"></path>
+                <path
+                    d="M8 6l4-4 4 4"
+                ></path>
 
-                <path d="M6 8l-4 4 4 4"></path>
-                <path d="M18 8l4 4-4 4"></path>
+                <path
+                    d="M8 18l4 4 4-4"
+                ></path>
+
+                <path
+                    d="M6 8l-4 4 4 4"
+                ></path>
+
+                <path
+                    d="M18 8l4 4-4 4"
+                ></path>
+
             </svg>
 
-            <!-- PENCIL ICON -->
-            <svg id="pencilIcon" viewBox="0 0 24 24" style="display:none;">
-                <path d="M4 20l4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20z"></path>
-                <path d="M14.5 6.5l3 3"></path>
+
+            <!-- PENCIL -->
+
+            <svg
+                id="pencilIcon"
+                viewBox="0 0 24 24"
+                style="display:none;"
+            >
+
+                <path
+                    d="M4 20l4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20z"
+                ></path>
+
+                <path
+                    d="M14.5 6.5l3 3"
+                ></path>
+
             </svg>
 
         </button>
 
-        <!-- SETTINGS -->
-        <button class="tool-btn" id="settingsBtn" title="Settings">
-            <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="3"></circle>
 
-                <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.5v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6v-2.5h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L9 6.7l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V5h2.5v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1v2.5h-.1a1.7 1.7 0 0 0-1.5 1z"></path>
+        <!-- SETTINGS -->
+
+        <button
+            class="tool-btn"
+            id="settingsBtn"
+            title="Settings"
+        >
+
+            <svg viewBox="0 0 24 24">
+
+                <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                ></circle>
+
+                <path
+                    d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.5v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6v-2.5h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L9 6.7l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V5h2.5v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1v2.5h-.1a1.7 1.7 0 0 0-1.5 1z"
+                ></path>
+
             </svg>
+
         </button>
 
     </div>
 
+
     <!-- SETTINGS PANEL -->
-    <div class="settings-panel" id="settingsPanel">
+
+    <div
+        class="settings-panel"
+        id="settingsPanel"
+    >
 
         <div class="settings-title">
             Settings
         </div>
 
+
         <div class="setting-group">
 
             <div class="setting-label">
+
                 Brush size:
                 <span id="sizeValue">5</span>px
+
             </div>
 
             <input
@@ -323,23 +476,43 @@ input[type="range"] {
 
         </div>
 
-        <button class="setting-button" id="removeImageBtn">
+
+        <button
+            class="setting-button"
+            id="removeImageBtn"
+        >
             Remove selected image
         </button>
 
-        <button class="setting-button" id="clearDrawingsBtn">
+
+        <button
+            class="setting-button"
+            id="clearDrawingsBtn"
+        >
             Clear drawings
         </button>
 
-        <button class="setting-button" id="downloadBtn">
+
+        <button
+            class="setting-button"
+            id="downloadBtn"
+        >
             Download PNG
         </button>
 
-        <button class="click-me-btn" id="clickMeBtn">
+
+        <button
+            class="click-me-btn"
+            id="clickMeBtn"
+        >
             Click me!
         </button>
 
-        <div class="mode-text" id="modeLabel">
+
+        <div
+            class="mode-text"
+            id="modeLabel"
+        >
             Move mode
         </div>
 
@@ -347,15 +520,17 @@ input[type="range"] {
 
 </div>
 
+
 <input
     type="file"
     id="imageInput"
     accept="image/png,image/jpeg,image/webp"
 >
 
+
 <script>
 
-/* ---------------- ELEMENTS ---------------- */
+/* ELEMENTS */
 
 const workspace =
     document.getElementById("workspace");
@@ -412,7 +587,7 @@ const clickMeBtn =
     document.getElementById("clickMeBtn");
 
 
-/* ---------------- VARIABLES ---------------- */
+/* VARIABLES */
 
 let mode = "move";
 
@@ -422,6 +597,9 @@ let selectedImage = null;
 
 let imageCounter = 0;
 
+
+/* MOVING */
+
 let movingImage = false;
 
 let moveStartX = 0;
@@ -430,41 +608,49 @@ let moveStartY = 0;
 let originalImageX = 0;
 let originalImageY = 0;
 
+
+/* RESIZING */
+
+let resizingImage = false;
+
+let resizeStartX = 0;
+
+let resizeStartWidth = 0;
+let resizeStartHeight = 0;
+
+
+/* DRAWING */
+
 let drawing = false;
 
 
-/* ---------------- CANVAS SIZE ---------------- */
+/* CANVAS */
 
 function resizeCanvas() {
 
-    const oldWidth =
+    const oldCanvas =
+        document.createElement("canvas");
+
+    oldCanvas.width =
         drawCanvas.width;
 
-    const oldHeight =
+    oldCanvas.height =
         drawCanvas.height;
 
-    let oldImage = null;
+    if (
+        oldCanvas.width &&
+        oldCanvas.height
+    ) {
 
-    if (oldWidth > 0 && oldHeight > 0) {
-
-        oldImage =
-            document.createElement("canvas");
-
-        oldImage.width =
-            oldWidth;
-
-        oldImage.height =
-            oldHeight;
-
-        const oldCtx =
-            oldImage.getContext("2d");
-
-        oldCtx.drawImage(
-            drawCanvas,
-            0,
-            0
-        );
+        oldCanvas
+            .getContext("2d")
+            .drawImage(
+                drawCanvas,
+                0,
+                0
+            );
     }
+
 
     drawCanvas.width =
         window.innerWidth;
@@ -472,10 +658,14 @@ function resizeCanvas() {
     drawCanvas.height =
         window.innerHeight;
 
-    if (oldImage) {
+
+    if (
+        oldCanvas.width &&
+        oldCanvas.height
+    ) {
 
         ctx.drawImage(
-            oldImage,
+            oldCanvas,
             0,
             0
         );
@@ -484,30 +674,31 @@ function resizeCanvas() {
 
 resizeCanvas();
 
+
 window.addEventListener(
     "resize",
     resizeCanvas
 );
 
 
-/* ---------------- MODE ---------------- */
+/* MODE */
 
 function setMode(newMode) {
 
     mode = newMode;
 
     movingImage = false;
+    resizingImage = false;
     drawing = false;
+
 
     if (mode === "draw") {
 
-        /*
-            DRAW MODE:
-            Drawing canvas goes above images.
-        */
+        drawCanvas.style.zIndex =
+            "10";
 
-        drawCanvas.style.zIndex = "10";
-        imageLayer.style.zIndex = "2";
+        imageLayer.style.zIndex =
+            "2";
 
         drawCanvas.style.pointerEvents =
             "auto";
@@ -523,13 +714,11 @@ function setMode(newMode) {
 
     } else {
 
-        /*
-            MOVE MODE:
-            Images go above drawing canvas.
-        */
+        drawCanvas.style.zIndex =
+            "1";
 
-        drawCanvas.style.zIndex = "1";
-        imageLayer.style.zIndex = "10";
+        imageLayer.style.zIndex =
+            "10";
 
         drawCanvas.style.pointerEvents =
             "none";
@@ -545,6 +734,7 @@ function setMode(newMode) {
     }
 }
 
+
 setMode("move");
 
 
@@ -553,16 +743,20 @@ modeBtn.addEventListener(
     () => {
 
         if (mode === "move") {
+
             setMode("draw");
+
         } else {
+
             setMode("move");
+
         }
 
     }
 );
 
 
-/* ---------------- SETTINGS ---------------- */
+/* SETTINGS */
 
 settingsBtn.addEventListener(
     "click",
@@ -576,23 +770,24 @@ settingsBtn.addEventListener(
 );
 
 
-/* ---------------- BRUSH SIZE ---------------- */
+/* BRUSH */
 
 brushSize.addEventListener(
     "input",
     () => {
 
         brush =
-            Number(brushSize.value);
+            Number(
+                brushSize.value
+            );
 
         sizeValue.textContent =
             brush;
-
     }
 );
 
 
-/* ---------------- ADD IMAGE ---------------- */
+/* ADD IMAGE */
 
 addImageBtn.addEventListener(
     "click",
@@ -613,8 +808,10 @@ imageInput.addEventListener(
 
         if (!file) return;
 
+
         const reader =
             new FileReader();
+
 
         reader.onload =
             (event) => {
@@ -625,16 +822,25 @@ imageInput.addEventListener(
 
             };
 
+
         reader.readAsDataURL(file);
 
-        imageInput.value = "";
+        imageInput.value =
+            "";
     }
 );
 
 
-/* ---------------- CREATE IMAGE ---------------- */
+/* CREATE IMAGE */
 
 function createImage(src) {
+
+    const container =
+        document.createElement("div");
+
+    container.className =
+        "image-container";
+
 
     const img =
         document.createElement("img");
@@ -648,10 +854,24 @@ function createImage(src) {
     img.draggable =
         false;
 
-    img.dataset.id =
-        ++imageCounter;
 
-    imageLayer.appendChild(img);
+    const handle =
+        document.createElement("div");
+
+    handle.className =
+        "resize-handle";
+
+
+    container.appendChild(img);
+    container.appendChild(handle);
+
+    imageLayer.appendChild(
+        container
+    );
+
+
+    container.dataset.x = "0";
+    container.dataset.y = "0";
 
 
     img.onload =
@@ -663,13 +883,16 @@ function createImage(src) {
             let height =
                 img.naturalHeight;
 
+
             const maxWidth =
                 window.innerWidth * .7;
 
             const maxHeight =
                 window.innerHeight * .7;
 
+
             let scale = 1;
+
 
             if (width > maxWidth) {
 
@@ -677,14 +900,20 @@ function createImage(src) {
                     maxWidth / width;
             }
 
-            if (height * scale > maxHeight) {
+
+            if (
+                height * scale >
+                maxHeight
+            ) {
 
                 scale =
                     maxHeight / height;
             }
 
+
             width *= scale;
             height *= scale;
+
 
             img.style.width =
                 width + "px";
@@ -692,55 +921,71 @@ function createImage(src) {
             img.style.height =
                 height + "px";
 
-            img.dataset.x =
-                (window.innerWidth - width) / 2;
 
-            img.dataset.y =
-                (window.innerHeight - height) / 2;
+            container.dataset.x =
+                (
+                    window.innerWidth -
+                    width
+                ) / 2;
 
-            img.dataset.scale =
-                1;
 
-            updateImage(img);
+            container.dataset.y =
+                (
+                    window.innerHeight -
+                    height
+                ) / 2;
 
-            selectImage(img);
+
+            updateImage(
+                container
+            );
+
+
+            selectImage(
+                container
+            );
         };
 
 
-    img.addEventListener(
+    container.addEventListener(
         "pointerdown",
         imagePointerDown
+    );
+
+
+    handle.addEventListener(
+        "pointerdown",
+        resizePointerDown
     );
 }
 
 
-/* ---------------- UPDATE IMAGE ---------------- */
+/* UPDATE IMAGE */
 
-function updateImage(img) {
+function updateImage(container) {
 
     const x =
-        Number(img.dataset.x);
+        Number(
+            container.dataset.x
+        );
 
     const y =
-        Number(img.dataset.y);
+        Number(
+            container.dataset.y
+        );
 
-    const scale =
-        Number(img.dataset.scale);
 
-    img.style.left =
+    container.style.left =
         x + "px";
 
-    img.style.top =
+    container.style.top =
         y + "px";
-
-    img.style.transform =
-        `scale(${scale})`;
 }
 
 
-/* ---------------- SELECT IMAGE ---------------- */
+/* SELECT */
 
-function selectImage(img) {
+function selectImage(container) {
 
     if (selectedImage) {
 
@@ -749,8 +994,10 @@ function selectImage(img) {
         );
     }
 
+
     selectedImage =
-        img;
+        container;
+
 
     if (selectedImage) {
 
@@ -761,7 +1008,7 @@ function selectImage(img) {
 }
 
 
-/* ---------------- IMAGE DOWN ---------------- */
+/* MOVE IMAGE */
 
 function imagePointerDown(e) {
 
@@ -769,16 +1016,32 @@ function imagePointerDown(e) {
         return;
     }
 
+
+    if (
+        e.target.classList.contains(
+            "resize-handle"
+        )
+    ) {
+        return;
+    }
+
+
     e.preventDefault();
     e.stopPropagation();
 
-    const img =
+
+    const container =
         e.currentTarget;
 
-    selectImage(img);
+
+    selectImage(
+        container
+    );
+
 
     movingImage =
         true;
+
 
     moveStartX =
         e.clientX;
@@ -786,15 +1049,21 @@ function imagePointerDown(e) {
     moveStartY =
         e.clientY;
 
+
     originalImageX =
-        Number(img.dataset.x);
+        Number(
+            container.dataset.x
+        );
 
     originalImageY =
-        Number(img.dataset.y);
+        Number(
+            container.dataset.y
+        );
+
 
     try {
 
-        img.setPointerCapture(
+        container.setPointerCapture(
             e.pointerId
         );
 
@@ -802,7 +1071,7 @@ function imagePointerDown(e) {
 }
 
 
-/* ---------------- IMAGE MOVE ---------------- */
+/* MOVE */
 
 document.addEventListener(
     "pointermove",
@@ -820,11 +1089,15 @@ document.addEventListener(
             return;
         }
 
+
         const dx =
-            e.clientX - moveStartX;
+            e.clientX -
+            moveStartX;
 
         const dy =
-            e.clientY - moveStartY;
+            e.clientY -
+            moveStartY;
+
 
         selectedImage.dataset.x =
             originalImageX + dx;
@@ -832,15 +1105,15 @@ document.addEventListener(
         selectedImage.dataset.y =
             originalImageY + dy;
 
+
         updateImage(
             selectedImage
         );
-
     }
 );
 
 
-/* ---------------- STOP MOVING ---------------- */
+/* STOP MOVE */
 
 document.addEventListener(
     "pointerup",
@@ -849,6 +1122,8 @@ document.addEventListener(
         movingImage =
             false;
 
+        resizingImage =
+            false;
     }
 );
 
@@ -859,11 +1134,143 @@ document.addEventListener(
         movingImage =
             false;
 
+        resizingImage =
+            false;
     }
 );
 
 
-/* ---------------- IMAGE RESIZE ---------------- */
+/* ---------------- RESIZE ---------------- */
+
+function resizePointerDown(e) {
+
+    if (mode !== "move") {
+        return;
+    }
+
+
+    e.preventDefault();
+    e.stopPropagation();
+
+
+    const container =
+        e.currentTarget.parentElement;
+
+
+    selectImage(
+        container
+    );
+
+
+    resizingImage =
+        true;
+
+
+    resizeStartX =
+        e.clientX;
+
+
+    resizeStartWidth =
+        container.querySelector(
+            ".image-object"
+        ).offsetWidth;
+
+
+    resizeStartHeight =
+        container.querySelector(
+            ".image-object"
+        ).offsetHeight;
+
+
+    try {
+
+        e.currentTarget.setPointerCapture(
+            e.pointerId
+        );
+
+    } catch {}
+}
+
+
+/* RESIZE MOVE */
+
+document.addEventListener(
+    "pointermove",
+    (e) => {
+
+        if (!resizingImage) {
+            return;
+        }
+
+        if (!selectedImage) {
+            return;
+        }
+
+        if (mode !== "move") {
+            return;
+        }
+
+
+        const img =
+            selectedImage.querySelector(
+                ".image-object"
+            );
+
+
+        const dx =
+            e.clientX -
+            resizeStartX;
+
+
+        /*
+            Use the horizontal movement
+            to resize while keeping the
+            original aspect ratio.
+        */
+
+        let newWidth =
+            resizeStartWidth + dx;
+
+
+        const aspectRatio =
+            resizeStartHeight /
+            resizeStartWidth;
+
+
+        let newHeight =
+            newWidth *
+            aspectRatio;
+
+
+        /*
+            Minimum size
+        */
+
+        const minSize =
+            40;
+
+
+        if (newWidth < minSize) {
+
+            newWidth =
+                minSize;
+
+            newHeight =
+                newWidth *
+                aspectRatio;
+        }
+
+
+        img.style.width =
+            newWidth + "px";
+
+        img.style.height =
+            newHeight + "px";
+    }
+);
+
+
+/* WHEEL RESIZE */
 
 workspace.addEventListener(
     "wheel",
@@ -877,31 +1284,71 @@ workspace.addEventListener(
             return;
         }
 
-        e.preventDefault();
 
-        let scale =
-            Number(
-                selectedImage.dataset.scale
-            );
+        /*
+            Don't resize when
+            hovering over the sidebar.
+        */
 
-        if (e.deltaY < 0) {
-            scale += .05;
-        } else {
-            scale -= .05;
+        if (
+            e.target.closest(
+                ".toolbar"
+            ) ||
+            e.target.closest(
+                ".settings-panel"
+            )
+        ) {
+            return;
         }
 
-        scale =
-            Math.max(
-                .1,
-                Math.min(5, scale)
+
+        e.preventDefault();
+
+
+        const img =
+            selectedImage.querySelector(
+                ".image-object"
             );
 
-        selectedImage.dataset.scale =
-            scale;
 
-        updateImage(
-            selectedImage
-        );
+        let width =
+            img.offsetWidth;
+
+
+        let height =
+            img.offsetHeight;
+
+
+        const ratio =
+            height / width;
+
+
+        if (e.deltaY < 0) {
+
+            width += 20;
+
+        } else {
+
+            width -= 20;
+        }
+
+
+        width =
+            Math.max(
+                40,
+                width
+            );
+
+
+        height =
+            width * ratio;
+
+
+        img.style.width =
+            width + "px";
+
+        img.style.height =
+            height + "px";
 
     },
     {
@@ -920,20 +1367,31 @@ drawCanvas.addEventListener(
             return;
         }
 
+
         e.preventDefault();
 
-        drawing = true;
 
-        drawCanvas.setPointerCapture(
-            e.pointerId
-        );
+        drawing =
+            true;
+
+
+        try {
+
+            drawCanvas.setPointerCapture(
+                e.pointerId
+            );
+
+        } catch {}
+
 
         ctx.beginPath();
+
 
         ctx.moveTo(
             e.clientX,
             e.clientY
         );
+
 
         ctx.lineWidth =
             brush;
@@ -962,12 +1420,15 @@ drawCanvas.addEventListener(
             return;
         }
 
+
         e.preventDefault();
+
 
         ctx.lineTo(
             e.clientX,
             e.clientY
         );
+
 
         ctx.stroke();
     }
@@ -980,7 +1441,10 @@ function stopDrawing() {
         return;
     }
 
-    drawing = false;
+
+    drawing =
+        false;
+
 
     ctx.closePath();
 }
@@ -1002,7 +1466,7 @@ drawCanvas.addEventListener(
 );
 
 
-/* ---------------- REMOVE IMAGE ---------------- */
+/* REMOVE IMAGE */
 
 removeImageBtn.addEventListener(
     "click",
@@ -1012,6 +1476,7 @@ removeImageBtn.addEventListener(
             return;
         }
 
+
         selectedImage.remove();
 
         selectedImage =
@@ -1020,7 +1485,7 @@ removeImageBtn.addEventListener(
 );
 
 
-/* ---------------- CLEAR DRAWINGS ---------------- */
+/* CLEAR DRAWINGS */
 
 clearDrawingsBtn.addEventListener(
     "click",
@@ -1032,19 +1497,21 @@ clearDrawingsBtn.addEventListener(
             drawCanvas.width,
             drawCanvas.height
         );
-
     }
 );
 
 
-/* ---------------- DOWNLOAD ---------------- */
+/* DOWNLOAD */
 
 downloadBtn.addEventListener(
     "click",
     () => {
 
         const output =
-            document.createElement("canvas");
+            document.createElement(
+                "canvas"
+            );
+
 
         output.width =
             window.innerWidth;
@@ -1052,12 +1519,14 @@ downloadBtn.addEventListener(
         output.height =
             window.innerHeight;
 
+
         const outputCtx =
             output.getContext("2d");
 
 
         outputCtx.fillStyle =
             "#090909";
+
 
         outputCtx.fillRect(
             0,
@@ -1069,21 +1538,29 @@ downloadBtn.addEventListener(
 
         const images =
             imageLayer.querySelectorAll(
-                ".image-object"
+                ".image-container"
             );
 
 
         images.forEach(
-            (img) => {
+            (container) => {
+
+                const img =
+                    container.querySelector(
+                        ".image-object"
+                    );
+
 
                 const x =
-                    Number(img.dataset.x);
+                    Number(
+                        container.dataset.x
+                    );
 
                 const y =
-                    Number(img.dataset.y);
+                    Number(
+                        container.dataset.y
+                    );
 
-                const scale =
-                    Number(img.dataset.scale);
 
                 const width =
                     img.offsetWidth;
@@ -1091,27 +1568,14 @@ downloadBtn.addEventListener(
                 const height =
                     img.offsetHeight;
 
-                outputCtx.save();
-
-                outputCtx.translate(
-                    x + width / 2,
-                    y + height / 2
-                );
-
-                outputCtx.scale(
-                    scale,
-                    scale
-                );
 
                 outputCtx.drawImage(
                     img,
-                    -width / 2,
-                    -height / 2,
+                    x,
+                    y,
                     width,
                     height
                 );
-
-                outputCtx.restore();
             }
         );
 
@@ -1126,20 +1590,23 @@ downloadBtn.addEventListener(
         const link =
             document.createElement("a");
 
+
         link.download =
             "skratch-pad-edit.png";
+
 
         link.href =
             output.toDataURL(
                 "image/png"
             );
 
+
         link.click();
     }
 );
 
 
-/* ---------------- CLICK ME ---------------- */
+/* CLICK ME */
 
 clickMeBtn.addEventListener(
     "click",
@@ -1147,7 +1614,6 @@ clickMeBtn.addEventListener(
 
         window.location.href =
             "index.html";
-
     }
 );
 
