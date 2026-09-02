@@ -4,31 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Minimalist Draw | GitHub</title>
-  <!-- Link to FontAwesome for the cool outlined icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- 100% Free Google Material Outlined Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- The black drawing board -->
   <canvas id="scratchpad"></canvas>
 
-  <!-- The floating minimalistic menu -->
   <div class="toolbar">
-    <!-- NEW: Palette Icon with Hidden Color Picker -->
-    <button id="colorBtn" class="icon-button" title="Choose Color">
-      <i class="far fa-palette"></i> <!-- Far = FontAwesome Regular (outlined) -->
+    <button id="colorBtn" class="icon-button active" title="Choose Color">
+      <span class="material-symbols-outlined">palette</span>
       <input type="color" id="colorPicker" value="#ffffff">
     </button>
     
-    <!-- NEW: The Eraser Icon Button -->
     <button id="eraserBtn" class="icon-button" title="Eraser">
-      <i class="far fa-eraser"></i>
+      <span class="material-symbols-outlined">ink_eraser</span>
     </button>
     
-    <!-- Updated Settings Icon (now outlined) -->
     <button id="settingsBtn" class="icon-button" title="Settings">
-      <i class="far fa-gear"></i>
+      <span class="material-symbols-outlined">settings</span>
     </button>
   </div>
 
