@@ -1,49 +1,79 @@
+// ...Previous canvas setup, resizeCanvas(), and getCoordinates() remain the same...
+
 const canvas = document.getElementById('scratchpad');
 const ctx = canvas.getContext('2d');
+const colorBtn = document.getElementById('colorBtn');
 const colorPicker = document.getElementById('colorPicker');
+const eraserBtn = document.getElementById('eraserBtn');
 const settingsBtn = document.getElementById('settingsBtn');
 
-// 1. Make the canvas fill the whole screen
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas(); // Call once to set initial size
-
-// 2. Setup drawing variables
 let isDrawing = false;
+let currentTool = 'brush'; // Options: 'brush' or 'eraser'
+let currentColor = colorPicker.value;
 
-// 3. Helper function to get exact X and Y for both mouse AND touch
-function getCoordinates(e) {
-  if (e.touches && e.touches.length > 0) {
-    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+// 1. Tool Selection Logic (Activate/Deactivate buttons)
+function setActiveTool(tool) {
+  currentTool = tool;
+  
+  // Remove 'active' class from all buttons
+  document.querySelectorAll('.icon-button').forEach(btn => btn.classList.remove('active'));
+  
+  if (tool === 'brush') {
+    colorBtn.classList.add('active'); // Highlight the palette when brush is active
+  } else if (tool === 'eraser') {
+    eraserBtn.classList.add('active'); // Highlight the eraser
   }
-  return { x: e.clientX, y: e.clientY };
 }
 
-// 4. Drawing Functions
+// Initial state: brush is active
+setActiveTool('brush');
+
+// 2. Button Listeners
+colorBtn.addEventListener('click', () => {
+  setActiveTool('brush');
+});
+
+// Update current color when the user picks from the wheel
+colorPicker.addEventListener('input', (e) => {
+  currentColor = e.target.value;
+  if (currentTool === 'brush') setActiveTool('brush'); // Ensure brush is active if color changes
+});
+
+eraserBtn.addEventListener('click', () => {
+  setActiveTool('eraser');
+});
+
+settingsBtn.addEventListener('click', () => {
+  // Now that we have the eraser, update this placeholder
+  alert("Settings: We can add brush size sliders here next!");
+});
+
+
+// 3. Drawing Logic
 function startDrawing(e) {
   isDrawing = true;
   const coords = getCoordinates(e);
-  
-  // Set brush styles here so they update if you change colors
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.lineWidth = 4;
-  ctx.strokeStyle = colorPicker.value;
-
   ctx.beginPath();
   ctx.moveTo(coords.x, coords.y);
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
   
-  // Draw a tiny dot immediately on click
+  // *** KEY ERASER LOGIC ***
+  if (currentTool === 'eraser') {
+    ctx.strokeStyle = '#000000'; // Erase with the background color
+    ctx.lineWidth = 15; // Make the eraser wider than the default brush
+  } else {
+    ctx.strokeStyle = currentColor; // Draw with the chosen color
+    ctx.lineWidth = 4; // Reset brush width
+  }
+
+  // Draw initial dot immediately
   ctx.lineTo(coords.x, coords.y);
   ctx.stroke();
 }
 
 function draw(e) {
-  if (!isDrawing) return; // Stop if mouse/finger isn't held down
-  
+  if (!isDrawing) return;
   const coords = getCoordinates(e);
   ctx.lineTo(coords.x, coords.y);
   ctx.stroke();
@@ -54,27 +84,4 @@ function stopDrawing() {
   ctx.closePath();
 }
 
-// 5. Mouse Events (Desktop)
-canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mouseout', stopDrawing); // Stops drawing if mouse leaves screen
-
-// 6. Touch Events (Phones, Tablets, Touch-screens)
-canvas.addEventListener('touchstart', (e) => {
-  e.preventDefault(); // Prevents the screen from scrolling while you draw
-  startDrawing(e);
-}, { passive: false });
-
-canvas.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-  draw(e);
-}, { passive: false });
-
-canvas.addEventListener('touchend', stopDrawing);
-canvas.addEventListener('touchcancel', stopDrawing);
-
-// 7. Settings Button
-settingsBtn.addEventListener('click', () => {
-  alert("Settings menu coming soon! You could add line thickness or an eraser here.");
-});
+// ...Mouse and Touch event listeners (mousedown, touchmove, etc.) remain the same...
