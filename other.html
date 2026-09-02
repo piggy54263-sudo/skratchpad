@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skratch-pad — Image Editor</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    background: #090909;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    color: white;
+}
+
+#workspace {
+    position: fixed;
+    inset: 0;
+
+    overflow: hidden;
+
+    touch-action: none;
+}
+
+#imageLayer,
+#drawCanvas {
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+}
+
+#imageLayer {
+    pointer-events: none;
+}
+
+#drawCanvas {
+    z-index: 5;
+
+    touch-action: none;
+
+    cursor: crosshair;
+}
+
+
+/* Images */
+
+.image-object {
+
+    position: absolute;
+
+    transform-origin: center center;
+
+    user-select: none;
+
+    cursor: grab;
+
+    max-width: none;
+
+    border: 1px solid transparent;
+
+    touch-action: none;
+}
+
+.image-object.selected {
+
+    border: 1px dashed rgba(255,255,255,.65);
+
+    box-shadow:
+        0 0 0 1px rgba(0,0,0,.5),
+        0 0 18px rgba(255,255,255,.08);
+
+}
+
+.image-object:active {
+    cursor: grabbing;
+}
+
+
+/* Sidebar */
+
+.toolbar {
+
+    position: fixed;
+
+    left: 18px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px;
+
+    background: rgba(25,25,25,.62);
+
+    border: 1px solid rgba(255,255,255,.13);
+
+    border-radius: 18px;
+
+    backdrop-filter: blur(18px);
+
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow:
+        0 10px 40px rgba(0,0,0,.45),
+        inset 0 1px rgba(255,255,255,.08);
+
+    z-index: 20;
+}
+
+.tool {
+
+    width: 46px;
+    height: 46px;
+
+    border: 0;
+
+    border-radius: 13px;
+
+    background: rgba(255,255,255,.05);
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition: .18s ease;
+
+    position: relative;
+}
+
+.tool:hover {
+
+    background: rgba(255,255,255,.12);
+
+    transform: translateX(2px);
+}
+
+.tool.active {
+
+    background: rgba(255,255,255,.16);
+}
+
+.tool svg {
+
+    width: 22px;
+    height: 22px;
+
+    stroke: currentColor;
+
+    fill: none;
+
+    stroke-width: 1.8;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+}
+
+.divider {
+
+    width: 27px;
+    height: 1px;
+
+    background: rgba(255,255,255,.12);
+
+    margin: 3px 0;
+}
+
+
+/* Title */
+
+.status {
+
+    position: fixed;
+
+    top: 18px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    padding: 7px 12px;
+
+    font-size: 15px;
+
+    color: rgba(255,255,255,.65);
+
+    letter-spacing: .5px;
+
+    pointer-events: none;
+
+    user-select: none;
+
+    z-index: 30;
+}
+
+
+/* Hidden file input */
+
+#imageInput {
+
+    display: none;
+}
+
+
+/* Settings */
+
+.settings {
+
+    position: fixed;
+
+    left: 82px;
+
+    top: 50%;
+
+    transform:
+        translateY(-50%)
+        translateX(-10px);
+
+    width: min(330px, calc(100vw - 110px));
+
+    padding: 18px;
+
+    background: rgba(25,25,25,.82);
+
+    border: 1px solid rgba(255,255,255,.13);
+
+    border-radius: 18px;
+
+    backdrop-filter: blur(20px);
+
+    -webkit-backdrop-filter: blur(20px);
+
+    box-shadow:
+        0 15px 50px rgba(0,0,0,.5);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: .2s ease;
+
+    z-index: 25;
+}
+
+.settings.open {
+
+    opacity: 1;
+
+    pointer-events: auto;
+
+    transform:
+        translateY(-50%)
+        translateX(0);
+}
+
+.settings h3 {
+
+    margin: 0 0 15px;
+
+    font-size: 15px;
+
+    font-weight: 500;
+}
+
+.setting-row {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin: 14px 0;
+
+    font-size: 13px;
+
+    color: #ddd;
+}
+
+input[type="range"] {
+
+    width: 140px;
+
+    accent-color: white;
+}
+
+.size-value {
+
+    min-width: 35px;
+
+    text-align: right;
+
+    color: #aaa;
+}
+
+.action-btn {
+
+    width: 100%;
+
+    padding: 11px;
+
+    margin-top: 7px;
+
+    border: 1px solid rgba(255,255,255,.12);
+
+    border-radius: 11px;
+
+    background: rgba(255,255,255,.06);
+
+    color: white;
+
+    cursor: pointer;
+}
+
+.action-btn:hover {
+
+    background: rgba(255,255,255,.12);
+}
+
+
+/* Mode label */
+
+.mode-label {
+
+    position: fixed;
+
+    bottom: 18px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    font-size: 11px;
+
+    color: rgba(255,255,255,.35);
+
+    pointer-events: none;
+
+    z-index: 15;
+}
+
+
+@media (max-width: 500px) {
+
+    .toolbar {
+
+        left: 10px;
+
+        padding: 7px;
+
+        border-radius: 16px;
+    }
+
+    .tool {
+
+        width: 43px;
+        height: 43px;
+    }
+
+    .settings {
+
+        left: 70px;
+
+        width: calc(100vw - 85px);
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="workspace">
+
+    <div id="imageLayer"></div>
+
+    <canvas id="drawCanvas"></canvas>
+
+</div>
+
+
+<div class="status">
+    Skratch-pad
+</div>
+
+
+<div class="mode-label" id="modeLabel">
+    Move mode
+</div>
+
+
+<input
+    type="file"
+    id="imageInput"
+    accept="image/png,image/jpeg,image/webp"
+>
+
+
+<!-- SETTINGS -->
+
+<div class="settings" id="settings">
+
+    <h3>Settings</h3>
+
+    <div class="setting-row">
+
+        <span>Brush size</span>
+
+        <input
+            id="brushSize"
+            type="range"
+            min="1"
+            max="60"
+            value="5"
+        >
+
+        <span
+            class="size-value"
+            id="sizeValue"
+        >
+            5px
+        </span>
+
+    </div>
+
+
+    <button
+        class="action-btn"
+        id="removeImageBtn"
+    >
+        Remove selected image
+    </button>
+
+
+    <button
+        class="action-btn"
+        id="clearDrawBtn"
+    >
+        Clear drawings
+    </button>
+
+
+    <button
+        class="action-btn"
+        id="downloadBtn"
+    >
+        Download PNG
+    </button>
+
+</div>
+
+
+<!-- SIDEBAR -->
+
+<div class="toolbar">
+
+    <!-- ADD IMAGE -->
+
+    <button
+        class="tool"
+        id="addImageBtn"
+        title="Add image"
+    >
+
+        <svg viewBox="0 0 24 24">
+
+            <rect
+                x="3"
+                y="4"
+                width="18"
+                height="16"
+                rx="2"
+            ></rect>
+
+            <circle
+                cx="8.5"
+                cy="9"
+                r="1.5"
+            ></circle>
+
+            <path
+                d="M21 15l-5-5L5 20"
+            ></path>
+
+            <path
+                d="M12 13l2-2 7 7"
+            ></path>
+
+        </svg>
+
+    </button>
+
+
+    <!-- MODE BUTTON -->
+
+    <button
+        class="tool active"
+        id="modeBtn"
+        title="Switch mode"
+    >
+
+        <!-- Move icon initially -->
+
+        <svg
+            id="moveIcon"
+            viewBox="0 0 24 24"
+        >
+
+            <path d="M12 3v18"></path>
+
+            <path d="M3 12h18"></path>
+
+            <path d="M9 6l3-3 3 3"></path>
+
+            <path d="M9 18l3 3 3-3"></path>
+
+            <path d="M6 9l-3 3 3 3"></path>
+
+            <path d="M18 9l3 3-3 3"></path>
+
+        </svg>
+
+
+        <!-- Pencil icon -->
+
+        <svg
+            id="pencilIcon"
+            viewBox="0 0 24 24"
+            style="display:none;"
+        >
+
+            <path
+                d="M4 20l4.5-1 10-10-3.5-3.5-10 10L4 20z"
+            ></path>
+
+            <path
+                d="M13.5 7.5l3.5 3.5"
+            ></path>
+
+            <path
+                d="M15 5l2-2 4 4-2 2"
+            ></path>
+
+        </svg>
+
+    </button>
+
+
+    <div class="divider"></div>
+
+
+    <!-- SETTINGS -->
+
+    <button
+        class="tool"
+        id="settingsBtn"
+        title="Settings"
+    >
+
+        <svg viewBox="0 0 24 24">
+
+            <circle
+                cx="12"
+                cy="12"
+                r="3"
+            ></circle>
+
+            <path
+                d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7- .1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L6 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4v-2.4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L5.3 8.6 7 6.9l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1z"
+            ></path>
+
+        </svg>
+
+    </button>
+
+</div>
+
+
+<script>
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const workspace =
+    document.getElementById("workspace");
+
+const imageLayer =
+    document.getElementById("imageLayer");
+
+const drawCanvas =
+    document.getElementById("drawCanvas");
+
+const ctx =
+    drawCanvas.getContext("2d");
+
+const imageInput =
+    document.getElementById("imageInput");
+
+const addImageBtn =
+    document.getElementById("addImageBtn");
+
+const modeBtn =
+    document.getElementById("modeBtn");
+
+const moveIcon =
+    document.getElementById("moveIcon");
+
+const pencilIcon =
+    document.getElementById("pencilIcon");
+
+const modeLabel =
+    document.getElementById("modeLabel");
+
+const settingsBtn =
+    document.getElementById("settingsBtn");
+
+const settings =
+    document.getElementById("settings");
+
+const brushSize =
+    document.getElementById("brushSize");
+
+const sizeValue =
+    document.getElementById("sizeValue");
+
+const removeImageBtn =
+    document.getElementById("removeImageBtn");
+
+const clearDrawBtn =
+    document.getElementById("clearDrawBtn");
+
+const downloadBtn =
+    document.getElementById("downloadBtn");
+
+
+/* =========================
+   VARIABLES
+========================= */
+
+let mode = "move";
+
+let selectedImage = null;
+
+let drawing = false;
+
+let lastX = 0;
+let lastY = 0;
+
+let brush = 5;
+
+let imageCounter = 0;
+
+
+/* =========================
+   CANVAS SIZE
+========================= */
+
+function resizeCanvas() {
+
+    const ratio =
+        window.devicePixelRatio || 1;
+
+    const old =
+        document.createElement("canvas");
+
+    old.width = drawCanvas.width;
+    old.height = drawCanvas.height;
+
+    if (
+        drawCanvas.width &&
+        drawCanvas.height
+    ) {
+
+        old.getContext("2d")
+            .drawImage(
+                drawCanvas,
+                0,
+                0
+            );
+    }
+
+    drawCanvas.width =
+        window.innerWidth * ratio;
+
+    drawCanvas.height =
+        window.innerHeight * ratio;
+
+    drawCanvas.style.width =
+        window.innerWidth + "px";
+
+    drawCanvas.style.height =
+        window.innerHeight + "px";
+
+    ctx.setTransform(
+        ratio,
+        0,
+        0,
+        ratio,
+        0,
+        0
+    );
+
+    if (
+        old.width &&
+        old.height
+    ) {
+
+        ctx.drawImage(
+            old,
+            0,
+            0,
+            old.width,
+            old.height,
+            0,
+            0,
+            window.innerWidth,
+            window.innerHeight
+        );
+    }
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+}
+
+resizeCanvas();
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+/* =========================
+   SWITCH MODE
+========================= */
+
+modeBtn.addEventListener(
+    "click",
+    () => {
+
+        if (mode === "move") {
+
+            mode = "draw";
+
+            moveIcon.style.display =
+                "none";
+
+            pencilIcon.style.display =
+                "block";
+
+            modeLabel.textContent =
+                "Draw mode";
+
+            drawCanvas.style.zIndex =
+                "15";
+
+        } else {
+
+            mode = "move";
+
+            moveIcon.style.display =
+                "block";
+
+            pencilIcon.style.display =
+                "none";
+
+            modeLabel.textContent =
+                "Move mode";
+
+            drawCanvas.style.zIndex =
+                "5";
+        }
+
+    }
+);
+
+
+/* =========================
+   ADD IMAGE
+========================= */
+
+addImageBtn.addEventListener(
+    "click",
+    () => {
+
+        imageInput.click();
+
+    }
+);
+
+
+imageInput.addEventListener(
+    "change",
+    e => {
+
+        const file =
+            e.target.files[0];
+
+        if (!file) return;
+
+        const reader =
+            new FileReader();
+
+        reader.onload = event => {
+
+            createImage(
+                event.target.result
+            );
+
+        };
+
+        reader.readAsDataURL(file);
+
+        imageInput.value = "";
+
+    }
+);
+
+
+/* =========================
+   CREATE IMAGE
+========================= */
+
+function createImage(src) {
+
+    const img =
+        document.createElement("img");
+
+    img.className =
+        "image-object";
+
+    img.src = src;
+
+    img.draggable = false;
+
+    img.dataset.id =
+        ++imageCounter;
+
+    imageLayer.appendChild(img);
+
+
+    img.onload = () => {
+
+        let width =
+            img.naturalWidth;
+
+        let height =
+            img.naturalHeight;
+
+
+        /*
+           Keep huge images
+           from filling the entire screen.
+        */
+
+        const maxWidth =
+            window.innerWidth * .7;
+
+        const maxHeight =
+            window.innerHeight * .7;
+
+
+        let scale = 1;
+
+        if (width > maxWidth) {
+
+            scale =
+                maxWidth / width;
+        }
+
+        if (
+            height * scale >
+            maxHeight
+        ) {
+
+            scale =
+                maxHeight / height;
+        }
+
+
+        width *= scale;
+        height *= scale;
+
+
+        img.style.width =
+            width + "px";
+
+        img.style.height =
+            height + "px";
+
+        img.dataset.x =
+            (window.innerWidth - width) / 2;
+
+        img.dataset.y =
+            (window.innerHeight - height) / 2;
+
+        img.dataset.scale = 1;
+
+        updateImage(img);
+
+        selectImage(img);
+
+    };
+
+
+    img.addEventListener(
+        "pointerdown",
+        imagePointerDown
+    );
+
+}
+
+
+/* =========================
+   UPDATE IMAGE
+========================= */
+
+function updateImage(img) {
+
+    const x =
+        Number(img.dataset.x);
+
+    const y =
+        Number(img.dataset.y);
+
+    const scale =
+        Number(img.dataset.scale);
+
+    img.style.left =
+        x + "px";
+
+    img.style.top =
+        y + "px";
+
+    img.style.transform =
+        `scale(${scale})`;
+}
+
+
+/* =========================
+   SELECT IMAGE
+========================= */
+
+function selectImage(img) {
+
+    if (selectedImage) {
+
+        selectedImage
+            .classList
+            .remove("selected");
+    }
+
+    selectedImage = img;
+
+    if (selectedImage) {
+
+        selectedImage
+            .classList
+            .add("selected");
+    }
+}
+
+
+/* =========================
+   MOVE IMAGE
+========================= */
+
+let movingImage = false;
+
+let moveStartX = 0;
+let moveStartY = 0;
+
+let originalImageX = 0;
+let originalImageY = 0;
+
+
+function imagePointerDown(e) {
+
+    if (mode !== "move") return;
+
+    e.stopPropagation();
+
+    const img =
+        e.currentTarget;
+
+    selectImage(img);
+
+    movingImage = true;
+
+    moveStartX = e.clientX;
+    moveStartY = e.clientY;
+
+    originalImageX =
+        Number(img.dataset.x);
+
+    originalImageY =
+        Number(img.dataset.y);
+
+    img.setPointerCapture(
+        e.pointerId
+    );
+}
+
+
+document.addEventListener(
+    "pointermove",
+    e => {
+
+        if (!movingImage) return;
+
+        if (!selectedImage) return;
+
+        const dx =
+            e.clientX - moveStartX;
+
+        const dy =
+            e.clientY - moveStartY;
+
+        selectedImage.dataset.x =
+            originalImageX + dx;
+
+        selectedImage.dataset.y =
+            originalImageY + dy;
+
+        updateImage(
+            selectedImage
+        );
+
+    }
+);
+
+
+document.addEventListener(
+    "pointerup",
+    () => {
+
+        movingImage = false;
+
+    }
+);
+
+
+/* =========================
+   IMAGE RESIZE
+   MOUSE WHEEL
+========================= */
+
+workspace.addEventListener(
+    "wheel",
+    e => {
+
+        if (mode !== "move") return;
+
+        if (!selectedImage) return;
+
+        e.preventDefault();
+
+        let scale =
+            Number(
+                selectedImage.dataset.scale
+            );
+
+        if (e.deltaY < 0) {
+
+            scale += .05;
+
+        } else {
+
+            scale -= .05;
+
+        }
+
+        scale =
+            Math.max(
+                .1,
+                Math.min(5, scale)
+            );
+
+        selectedImage.dataset.scale =
+            scale;
+
+        updateImage(
+            selectedImage
+        );
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+/* =========================
+   DRAWING
+========================= */
+
+drawCanvas.addEventListener(
+    "pointerdown",
+    e => {
+
+        if (mode !== "draw") return;
+
+        drawing = true;
+
+        drawCanvas.setPointerCapture(
+            e.pointerId
+        );
+
+        lastX = e.clientX;
+        lastY = e.clientY;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            lastX,
+            lastY,
+            brush / 2,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle = "white";
+
+        ctx.fill();
+
+    }
+);
+
+
+drawCanvas.addEventListener(
+    "pointermove",
+    e => {
+
+        if (!drawing) return;
+
+        if (mode !== "draw") return;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            lastX,
+            lastY
+        );
+
+        ctx.lineTo(
+            e.clientX,
+            e.clientY
+        );
+
+        ctx.lineWidth =
+            brush;
+
+        ctx.strokeStyle =
+            "white";
+
+        ctx.lineCap =
+            "round";
+
+        ctx.lineJoin =
+            "round";
+
+        ctx.stroke();
+
+        lastX =
+            e.clientX;
+
+        lastY =
+            e.clientY;
+
+    }
+);
+
+
+drawCanvas.addEventListener(
+    "pointerup",
+    () => {
+
+        drawing = false;
+
+    }
+);
+
+
+drawCanvas.addEventListener(
+    "pointercancel",
+    () => {
+
+        drawing = false;
+
+    }
+);
+
+
+/* =========================
+   BRUSH SIZE
+========================= */
+
+brushSize.addEventListener(
+    "input",
+    () => {
+
+        brush =
+            Number(
+                brushSize.value
+            );
+
+        sizeValue.textContent =
+            brush + "px";
+
+    }
+);
+
+
+/* =========================
+   REMOVE IMAGE
+========================= */
+
+removeImageBtn.addEventListener(
+    "click",
+    () => {
+
+        if (!selectedImage) return;
+
+        selectedImage.remove();
+
+        selectedImage = null;
+
+    }
+);
+
+
+/* =========================
+   CLEAR DRAWINGS
+========================= */
+
+clearDrawBtn.addEventListener(
+    "click",
+    () => {
+
+        ctx.clearRect(
+            0,
+            0,
+            window.innerWidth,
+            window.innerHeight
+        );
+
+    }
+);
+
+
+/* =========================
+   DOWNLOAD EVERYTHING
+========================= */
+
+downloadBtn.addEventListener(
+    "click",
+    async () => {
+
+        const output =
+            document.createElement("canvas");
+
+        const ratio =
+            window.devicePixelRatio || 1;
+
+        output.width =
+            window.innerWidth * ratio;
+
+        output.height =
+            window.innerHeight * ratio;
+
+        const out =
+            output.getContext("2d");
+
+        out.scale(
+            ratio,
+            ratio
+        );
+
+
+        /* Background */
+
+        out.fillStyle =
+            "#090909";
+
+        out.fillRect(
+            0,
+            0,
+            window.innerWidth,
+            window.innerHeight
+        );
+
+
+        /* Images */
+
+        const images =
+            [...imageLayer.children];
+
+
+        for (const img of images) {
+
+            if (!img.complete) continue;
+
+            const x =
+                Number(img.dataset.x);
+
+            const y =
+                Number(img.dataset.y);
+
+            const scale =
+                Number(img.dataset.scale);
+
+
+            const width =
+                img.offsetWidth;
+
+            const height =
+                img.offsetHeight;
+
+
+            out.save();
+
+            out.translate(
+                x + width / 2,
+                y + height / 2
+            );
+
+            out.scale(
+                scale,
+                scale
+            );
+
+            out.drawImage(
+                img,
+                -width / 2,
+                -height / 2,
+                width,
+                height
+            );
+
+            out.restore();
+
+        }
+
+
+        /* Drawings */
+
+        out.drawImage(
+            drawCanvas,
+            0,
+            0,
+            drawCanvas.width,
+            drawCanvas.height,
+            0,
+            0,
+            window.innerWidth,
+            window.innerHeight
+        );
+
+
+        const link =
+            document.createElement("a");
+
+        link.download =
+            "skratch-pad-edit.png";
+
+        link.href =
+            output.toDataURL(
+                "image/png"
+            );
+
+        link.click();
+
+    }
+);
+
+
+/* =========================
+   SETTINGS
+========================= */
+
+settingsBtn.addEventListener(
+    "click",
+    () => {
+
+        settings.classList.toggle(
+            "open"
+        );
+
+        settingsBtn.classList.toggle(
+            "active"
+        );
+
+    }
+);
+
+
+/* Close settings */
+
+document.addEventListener(
+    "pointerdown",
+    e => {
+
+        if (
+            settings.classList.contains("open") &&
+            !settings.contains(e.target) &&
+            !settingsBtn.contains(e.target)
+        ) {
+
+            settings.classList.remove(
+                "open"
+            );
+
+            settingsBtn.classList.remove(
+                "active"
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
