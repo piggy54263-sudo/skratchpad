@@ -31,7 +31,6 @@
         touch-action: none;
     }
 
-    /* Floating sidebar */
     .toolbar {
         position: fixed;
         left: 18px;
@@ -104,7 +103,6 @@
         margin: 3px 0;
     }
 
-    /* Color picker */
     #colorPicker {
         position: absolute;
         opacity: 0;
@@ -124,7 +122,6 @@
         right: 7px;
     }
 
-    /* Settings */
     .settings {
         position: fixed;
         left: 82px;
@@ -184,7 +181,8 @@
     }
 
     .clear-btn,
-    .download-btn {
+    .download-btn,
+    .click-me-btn {
         width: 100%;
         padding: 11px;
         margin-top: 7px;
@@ -199,11 +197,11 @@
     }
 
     .clear-btn:hover,
-    .download-btn:hover {
+    .download-btn:hover,
+    .click-me-btn:hover {
         background: rgba(255,255,255,.12);
     }
 
-    /* Top title */
     .status {
         position: fixed;
         top: 18px;
@@ -220,9 +218,9 @@
         user-select: none;
     }
 
-    /* Eraser outline */
     .eraser-cursor {
         position: fixed;
+
         width: 5px;
         height: 5px;
 
@@ -269,7 +267,6 @@
 
 <div class="eraser-cursor" id="eraserCursor"></div>
 
-<!-- Settings panel -->
 <div class="settings" id="settings">
 
     <h3>Settings</h3>
@@ -296,12 +293,14 @@
         Download PNG
     </button>
 
+    <button class="click-me-btn" id="clickMeBtn">
+        Click me!
+    </button>
+
 </div>
 
-<!-- Toolbar -->
 <div class="toolbar">
 
-    <!-- Palette -->
     <button class="tool" id="colorBtn" title="Color">
 
         <svg viewBox="0 0 24 24">
@@ -318,7 +317,6 @@
 
     </button>
 
-    <!-- Eraser -->
     <button class="tool" id="eraserBtn" title="Eraser">
 
         <svg viewBox="0 0 24 24">
@@ -331,13 +329,12 @@
 
     <div class="divider"></div>
 
-    <!-- Settings -->
     <button class="tool" id="settingsBtn" title="Settings">
 
         <svg viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="3"></circle>
 
-            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L6 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4v-2.4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L5.3 8.6 7 6.9l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V5h2.4v.8a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0-1.5 1z"></path>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L6 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4v-2.4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L5.3 8.6 7 6.9l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1z"></path>
         </svg>
 
     </button>
@@ -364,6 +361,7 @@ const sizeValue = document.getElementById("sizeValue");
 
 const clearBtn = document.getElementById("clearBtn");
 const downloadBtn = document.getElementById("downloadBtn");
+const clickMeBtn = document.getElementById("clickMeBtn");
 
 let drawing = false;
 let erasing = false;
@@ -374,8 +372,6 @@ let currentSize = 5;
 let lastX = 0;
 let lastY = 0;
 
-
-/* Canvas resolution */
 function resizeCanvas() {
 
     const oldCanvas = document.createElement("canvas");
@@ -419,8 +415,6 @@ resizeCanvas();
 
 window.addEventListener("resize", resizeCanvas);
 
-
-/* Get pointer position */
 function getPosition(e) {
 
     const rect = canvas.getBoundingClientRect();
@@ -431,8 +425,6 @@ function getPosition(e) {
     };
 }
 
-
-/* Update eraser outline */
 function updateEraserCursor(e) {
 
     if (!erasing) return;
@@ -446,8 +438,6 @@ function updateEraserCursor(e) {
     eraserCursor.style.top = e.clientY + "px";
 }
 
-
-/* Move cursor */
 canvas.addEventListener("pointermove", e => {
 
     updateEraserCursor(e);
@@ -462,14 +452,10 @@ canvas.addEventListener("pointermove", e => {
     ctx.lineTo(pos.x, pos.y);
 
     ctx.lineWidth = currentSize;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
 
-    if (erasing) {
-        ctx.strokeStyle = "#090909";
-    } else {
-        ctx.strokeStyle = currentColor;
-    }
+    ctx.strokeStyle = erasing
+        ? "#090909"
+        : currentColor;
 
     ctx.stroke();
 
@@ -477,8 +463,6 @@ canvas.addEventListener("pointermove", e => {
     lastY = pos.y;
 });
 
-
-/* Start drawing */
 canvas.addEventListener("pointerdown", e => {
 
     drawing = true;
@@ -492,7 +476,9 @@ canvas.addEventListener("pointerdown", e => {
 
     ctx.beginPath();
 
-    ctx.fillStyle = erasing ? "#090909" : currentColor;
+    ctx.fillStyle = erasing
+        ? "#090909"
+        : currentColor;
 
     ctx.arc(
         lastX,
@@ -505,8 +491,6 @@ canvas.addEventListener("pointerdown", e => {
     ctx.fill();
 });
 
-
-/* Stop drawing */
 function stopDrawing() {
     drawing = false;
 }
@@ -514,21 +498,16 @@ function stopDrawing() {
 canvas.addEventListener("pointerup", stopDrawing);
 canvas.addEventListener("pointercancel", stopDrawing);
 
-
-/* Hide eraser cursor */
 canvas.addEventListener("pointerleave", () => {
 
     if (!drawing) {
         eraserCursor.style.display = "none";
     }
+
 });
 
-
-/* Color picker */
 colorBtn.addEventListener("click", () => {
-
     colorPicker.click();
-
 });
 
 colorPicker.addEventListener("input", e => {
@@ -544,8 +523,6 @@ colorPicker.addEventListener("input", e => {
     eraserCursor.style.display = "none";
 });
 
-
-/* Eraser */
 eraserBtn.addEventListener("click", () => {
 
     erasing = !erasing;
@@ -557,8 +534,6 @@ eraserBtn.addEventListener("click", () => {
     }
 });
 
-
-/* Settings */
 settingsBtn.addEventListener("click", () => {
 
     settings.classList.toggle("open");
@@ -567,11 +542,8 @@ settingsBtn.addEventListener("click", () => {
         "active",
         settings.classList.contains("open")
     );
-
 });
 
-
-/* Brush size */
 brushSize.addEventListener("input", () => {
 
     currentSize = Number(brushSize.value);
@@ -582,11 +554,8 @@ brushSize.addEventListener("input", () => {
         eraserCursor.style.width = currentSize + "px";
         eraserCursor.style.height = currentSize + "px";
     }
-
 });
 
-
-/* Clear */
 clearBtn.addEventListener("click", () => {
 
     ctx.fillStyle = "#090909";
@@ -597,11 +566,8 @@ clearBtn.addEventListener("click", () => {
         window.innerWidth,
         window.innerHeight
     );
-
 });
 
-
-/* Download */
 downloadBtn.addEventListener("click", () => {
 
     const link = document.createElement("a");
@@ -611,11 +577,15 @@ downloadBtn.addEventListener("click", () => {
     link.href = canvas.toDataURL("image/png");
 
     link.click();
+});
+
+/* NEW: Open the image editor */
+clickMeBtn.addEventListener("click", () => {
+
+    window.location.href = "other.html";
 
 });
 
-
-/* Close settings when clicking outside */
 document.addEventListener("pointerdown", e => {
 
     if (
