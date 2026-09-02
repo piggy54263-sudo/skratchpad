@@ -1,191 +1,638 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimalist Scratchpad</title>
-  <!-- Google Material Outlined Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <style>
-    /* Reset and Layout */
-    body, html {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background-color: #000000;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skratch-pad</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    /* Canvas setup with touch-action none to prevent scroll interference */
+    html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #090909;
+        font-family: Arial, Helvetica, sans-serif;
+        color: white;
+    }
+
     canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      touch-action: none;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        cursor: crosshair;
+        touch-action: none;
     }
 
-    /* Minimalistic Floating Toolbar */
+    /* Floating sidebar */
     .toolbar {
-      position: fixed;
-      top: 25px;
-      right: 25px;
-      display: flex;
-      gap: 15px;
-      background: rgba(255, 255, 255, 0.08);
-      padding: 10px 14px;
-      border-radius: 16px;
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      z-index: 10;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        position: fixed;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+
+        padding: 9px;
+
+        background: rgba(25, 25, 25, 0.62);
+        border: 1px solid rgba(255,255,255,0.13);
+        border-radius: 18px;
+
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+
+        box-shadow:
+            0 10px 40px rgba(0,0,0,.45),
+            inset 0 1px rgba(255,255,255,.08);
+
+        z-index: 10;
     }
 
-    /* Button Styling */
-    .icon-button {
-      background: none;
-      border: 1px solid transparent;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 12px;
-      transition: all 0.2s ease;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
+    .tool {
+        width: 46px;
+        height: 46px;
+
+        border: 0;
+        border-radius: 13px;
+
+        background: rgba(255,255,255,.05);
+        color: white;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        cursor: pointer;
+        transition: .18s ease;
+        position: relative;
     }
 
-    .icon-button:hover, .icon-button.active {
-      border-color: rgba(255, 255, 255, 0.8);
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateY(-2px);
+    .tool:hover {
+        background: rgba(255,255,255,.12);
+        transform: translateX(2px);
     }
 
-    /* Palette Icon & Hidden Color Wheel Wrapper */
-    #colorBtn span {
-      position: absolute;
-      pointer-events: none;
+    .tool.active {
+        background: rgba(255,255,255,.16);
     }
 
+    .tool svg {
+        width: 22px;
+        height: 22px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .divider {
+        width: 27px;
+        height: 1px;
+        background: rgba(255,255,255,.12);
+        margin: 3px 0;
+    }
+
+    /* Color picker */
     #colorPicker {
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      border: none;
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+        width: 1px;
+        height: 1px;
     }
-  </style>
+
+    .color-preview {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid rgba(255,255,255,.8);
+        position: absolute;
+        bottom: 7px;
+        right: 7px;
+    }
+
+    /* Settings */
+    .settings {
+        position: fixed;
+        left: 82px;
+        top: 50%;
+        transform: translateY(-50%) translateX(-10px);
+
+        width: min(330px, calc(100vw - 110px));
+
+        padding: 18px;
+
+        background: rgba(25,25,25,.82);
+        border: 1px solid rgba(255,255,255,.13);
+        border-radius: 18px;
+
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+
+        box-shadow: 0 15px 50px rgba(0,0,0,.5);
+
+        opacity: 0;
+        pointer-events: none;
+
+        transition: .2s ease;
+        z-index: 9;
+    }
+
+    .settings.open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(-50%) translateX(0);
+    }
+
+    .settings h3 {
+        margin: 0 0 15px;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 14px 0;
+        font-size: 13px;
+        color: #ddd;
+    }
+
+    input[type="range"] {
+        width: 150px;
+        accent-color: white;
+    }
+
+    .size-value {
+        min-width: 35px;
+        text-align: right;
+        color: #aaa;
+    }
+
+    .clear-btn,
+    .download-btn {
+        width: 100%;
+        padding: 11px;
+        margin-top: 7px;
+
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 11px;
+
+        background: rgba(255,255,255,.06);
+        color: white;
+
+        cursor: pointer;
+    }
+
+    .clear-btn:hover,
+    .download-btn:hover {
+        background: rgba(255,255,255,.12);
+    }
+
+    /* Top title */
+    .status {
+        position: fixed;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+
+        padding: 7px 12px;
+
+        font-size: 15px;
+        color: rgba(255,255,255,.65);
+        letter-spacing: .5px;
+
+        pointer-events: none;
+        user-select: none;
+    }
+
+    /* Eraser outline */
+    .eraser-cursor {
+        position: fixed;
+        width: 5px;
+        height: 5px;
+
+        border: 1.5px solid white;
+        border-radius: 50%;
+
+        pointer-events: none;
+        display: none;
+
+        transform: translate(-50%, -50%);
+
+        z-index: 20;
+
+        box-shadow:
+            0 0 0 1px rgba(0,0,0,.7),
+            0 0 8px rgba(255,255,255,.25);
+    }
+
+    @media (max-width: 500px) {
+        .toolbar {
+            left: 10px;
+            padding: 7px;
+            border-radius: 16px;
+        }
+
+        .tool {
+            width: 43px;
+            height: 43px;
+        }
+
+        .settings {
+            left: 70px;
+            width: calc(100vw - 85px);
+        }
+    }
+</style>
 </head>
+
 <body>
 
-  <!-- Drawing Canvas -->
-  <canvas id="scratchpad"></canvas>
+<canvas id="canvas"></canvas>
 
-  <!-- Minimalist Toolbar -->
-  <div class="toolbar">
-    <button id="colorBtn" class="icon-button active" title="Choose Color">
-      <span class="material-symbols-outlined">palette</span>
-      <input type="color" id="colorPicker" value="#ffffff">
+<div class="status">Skratch-pad</div>
+
+<div class="eraser-cursor" id="eraserCursor"></div>
+
+<!-- Settings panel -->
+<div class="settings" id="settings">
+
+    <h3>Settings</h3>
+
+    <div class="setting-row">
+        <span>Brush size</span>
+
+        <input
+            id="brushSize"
+            type="range"
+            min="1"
+            max="60"
+            value="5"
+        >
+
+        <span class="size-value" id="sizeValue">5px</span>
+    </div>
+
+    <button class="clear-btn" id="clearBtn">
+        Clear canvas
     </button>
-    <button id="eraserBtn" class="icon-button" title="Eraser">
-      <span class="material-symbols-outlined">ink_eraser</span>
+
+    <button class="download-btn" id="downloadBtn">
+        Download PNG
     </button>
-    <button id="settingsBtn" class="icon-button" title="Settings">
-      <span class="material-symbols-outlined">settings</span>
+
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+
+    <!-- Palette -->
+    <button class="tool" id="colorBtn" title="Color">
+
+        <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="8" cy="10" r="1"></circle>
+            <circle cx="12" cy="7" r="1"></circle>
+            <circle cx="16" cy="10" r="1"></circle>
+            <path d="M12 21c-1.7 0-2.5-1.3-1.7-2.5.6-.9 1.7-1.5 1.7-2.5 0-1.2-1-2-2.2-2H8"></path>
+        </svg>
+
+        <span class="color-preview" id="colorPreview"></span>
+
+        <input type="color" id="colorPicker" value="#ffffff">
+
     </button>
-  </div>
 
-  <script>
-    const canvas = document.getElementById('scratchpad');
-    const ctx = canvas.getContext('2d');
-    const colorBtn = document.getElementById('colorBtn');
-    const colorPicker = document.getElementById('colorPicker');
-    const eraserBtn = document.getElementById('eraserBtn');
-    const settingsBtn = document.getElementById('settingsBtn');
+    <!-- Eraser -->
+    <button class="tool" id="eraserBtn" title="Eraser">
 
-    // Handle high-res full screen scaling
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); 
+        <svg viewBox="0 0 24 24">
+            <path d="M7 17l7-10 5 3-7 10H7z"></path>
+            <path d="M7 17l-3-3 7-10 3 3"></path>
+            <path d="M14 20h6"></path>
+        </svg>
 
-    let isDrawing = false;
-    let currentTool = 'brush'; 
-    let currentColor = colorPicker.value;
+    </button>
 
-    // Tool Switching Logic
-    function setActiveTool(tool) {
-      currentTool = tool;
-      document.querySelectorAll('.icon-button').forEach(btn => btn.classList.remove('active'));
-      if (tool === 'brush') colorBtn.classList.add('active');
-      else if (tool === 'eraser') eraserBtn.classList.add('active');
-    }
+    <div class="divider"></div>
 
-    colorBtn.addEventListener('click', () => setActiveTool('brush'));
-    colorPicker.addEventListener('input', (e) => {
-      currentColor = e.target.value;
-      setActiveTool('brush');
-    });
-    eraserBtn.addEventListener('click', () => setActiveTool('eraser'));
-    settingsBtn.addEventListener('click', () => alert("Settings menu: Ready for customization!"));
+    <!-- Settings -->
+    <button class="tool" id="settingsBtn" title="Settings">
 
-    // Coordinate mapping for mouse & touch
-    function getCoordinates(e) {
-      if (e.touches && e.touches.length > 0) {
-        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      }
-      return { x: e.clientX, y: e.clientY };
-    }
+        <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
 
-    // Drawing Functions
-    function startDrawing(e) {
-      isDrawing = true;
-      const coords = getCoordinates(e);
-      ctx.beginPath();
-      ctx.moveTo(coords.x, coords.y);
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
-      
-      if (currentTool === 'eraser') {
-        ctx.strokeStyle = '#000000'; // Blends into the black background
-        ctx.lineWidth = 24;          // Wider stroke for easy erasing
-      } else {
-        ctx.strokeStyle = currentColor; 
-        ctx.lineWidth = 4;           // Clean standard brush size
-      }
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L6 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H4v-2.4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L5.3 8.6 7 6.9l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V5h2.4v.8a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0-1.5 1z"></path>
+        </svg>
 
-      ctx.lineTo(coords.x, coords.y);
-      ctx.stroke();
-    }
+    </button>
 
-    function draw(e) {
-      if (!isDrawing) return;
-      const coords = getCoordinates(e);
-      ctx.lineTo(coords.x, coords.y);
-      ctx.stroke();
+</div>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const colorBtn = document.getElementById("colorBtn");
+const colorPicker = document.getElementById("colorPicker");
+const colorPreview = document.getElementById("colorPreview");
+
+const eraserBtn = document.getElementById("eraserBtn");
+const eraserCursor = document.getElementById("eraserCursor");
+
+const settingsBtn = document.getElementById("settingsBtn");
+const settings = document.getElementById("settings");
+
+const brushSize = document.getElementById("brushSize");
+const sizeValue = document.getElementById("sizeValue");
+
+const clearBtn = document.getElementById("clearBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+
+let drawing = false;
+let erasing = false;
+
+let currentColor = "#ffffff";
+let currentSize = 5;
+
+let lastX = 0;
+let lastY = 0;
+
+
+/* Canvas resolution */
+function resizeCanvas() {
+
+    const oldCanvas = document.createElement("canvas");
+
+    oldCanvas.width = canvas.width;
+    oldCanvas.height = canvas.height;
+
+    if (canvas.width && canvas.height) {
+        oldCanvas.getContext("2d").drawImage(canvas, 0, 0);
     }
 
-    function stopDrawing() {
-      isDrawing = false;
-      ctx.closePath();
+    const ratio = window.devicePixelRatio || 1;
+
+    canvas.width = window.innerWidth * ratio;
+    canvas.height = window.innerHeight * ratio;
+
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+    if (oldCanvas.width && oldCanvas.height) {
+        ctx.drawImage(
+            oldCanvas,
+            0,
+            0,
+            oldCanvas.width,
+            oldCanvas.height,
+            0,
+            0,
+            window.innerWidth,
+            window.innerHeight
+        );
     }
 
-    // Mouse Event Listeners
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+}
 
-    // Touch Event Listeners (for phones/tablets)
-    canvas.addEventListener('touchstart', (e) => startDrawing(e));
-    canvas.addEventListener('touchmove', (e) => draw(e));
-    canvas.addEventListener('touchend', stopDrawing);
-    canvas.addEventListener('touchcancel', stopDrawing);
-  </script>
+resizeCanvas();
+
+window.addEventListener("resize", resizeCanvas);
+
+
+/* Get pointer position */
+function getPosition(e) {
+
+    const rect = canvas.getBoundingClientRect();
+
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+}
+
+
+/* Update eraser outline */
+function updateEraserCursor(e) {
+
+    if (!erasing) return;
+
+    eraserCursor.style.display = "block";
+
+    eraserCursor.style.width = currentSize + "px";
+    eraserCursor.style.height = currentSize + "px";
+
+    eraserCursor.style.left = e.clientX + "px";
+    eraserCursor.style.top = e.clientY + "px";
+}
+
+
+/* Move cursor */
+canvas.addEventListener("pointermove", e => {
+
+    updateEraserCursor(e);
+
+    if (!drawing) return;
+
+    const pos = getPosition(e);
+
+    ctx.beginPath();
+
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(pos.x, pos.y);
+
+    ctx.lineWidth = currentSize;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    if (erasing) {
+        ctx.strokeStyle = "#090909";
+    } else {
+        ctx.strokeStyle = currentColor;
+    }
+
+    ctx.stroke();
+
+    lastX = pos.x;
+    lastY = pos.y;
+});
+
+
+/* Start drawing */
+canvas.addEventListener("pointerdown", e => {
+
+    drawing = true;
+
+    const pos = getPosition(e);
+
+    lastX = pos.x;
+    lastY = pos.y;
+
+    canvas.setPointerCapture(e.pointerId);
+
+    ctx.beginPath();
+
+    ctx.fillStyle = erasing ? "#090909" : currentColor;
+
+    ctx.arc(
+        lastX,
+        lastY,
+        currentSize / 2,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+});
+
+
+/* Stop drawing */
+function stopDrawing() {
+    drawing = false;
+}
+
+canvas.addEventListener("pointerup", stopDrawing);
+canvas.addEventListener("pointercancel", stopDrawing);
+
+
+/* Hide eraser cursor */
+canvas.addEventListener("pointerleave", () => {
+
+    if (!drawing) {
+        eraserCursor.style.display = "none";
+    }
+});
+
+
+/* Color picker */
+colorBtn.addEventListener("click", () => {
+
+    colorPicker.click();
+
+});
+
+colorPicker.addEventListener("input", e => {
+
+    currentColor = e.target.value;
+
+    colorPreview.style.background = currentColor;
+
+    erasing = false;
+
+    eraserBtn.classList.remove("active");
+
+    eraserCursor.style.display = "none";
+});
+
+
+/* Eraser */
+eraserBtn.addEventListener("click", () => {
+
+    erasing = !erasing;
+
+    eraserBtn.classList.toggle("active", erasing);
+
+    if (!erasing) {
+        eraserCursor.style.display = "none";
+    }
+});
+
+
+/* Settings */
+settingsBtn.addEventListener("click", () => {
+
+    settings.classList.toggle("open");
+
+    settingsBtn.classList.toggle(
+        "active",
+        settings.classList.contains("open")
+    );
+
+});
+
+
+/* Brush size */
+brushSize.addEventListener("input", () => {
+
+    currentSize = Number(brushSize.value);
+
+    sizeValue.textContent = currentSize + "px";
+
+    if (erasing) {
+        eraserCursor.style.width = currentSize + "px";
+        eraserCursor.style.height = currentSize + "px";
+    }
+
+});
+
+
+/* Clear */
+clearBtn.addEventListener("click", () => {
+
+    ctx.fillStyle = "#090909";
+
+    ctx.fillRect(
+        0,
+        0,
+        window.innerWidth,
+        window.innerHeight
+    );
+
+});
+
+
+/* Download */
+downloadBtn.addEventListener("click", () => {
+
+    const link = document.createElement("a");
+
+    link.download = "skratch-pad.png";
+
+    link.href = canvas.toDataURL("image/png");
+
+    link.click();
+
+});
+
+
+/* Close settings when clicking outside */
+document.addEventListener("pointerdown", e => {
+
+    if (
+        settings.classList.contains("open") &&
+        !settings.contains(e.target) &&
+        !settingsBtn.contains(e.target)
+    ) {
+
+        settings.classList.remove("open");
+
+        settingsBtn.classList.remove("active");
+
+    }
+
+});
+
+</script>
+
 </body>
 </html>
