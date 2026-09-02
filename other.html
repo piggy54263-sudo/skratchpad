@@ -70,7 +70,6 @@ html, body {
 
 .image-container.selected .image-object {
     border: 1px dashed rgba(255,255,255,.65);
-
     box-shadow:
         0 0 0 1px rgba(0,0,0,.5),
         0 0 18px rgba(255,255,255,.08);
@@ -85,23 +84,15 @@ html, body {
 
 .resize-handle {
     position: absolute;
-
     right: -7px;
     bottom: -7px;
-
     width: 15px;
     height: 15px;
-
     border-radius: 50%;
-
     background: white;
-
     border: 2px solid #111;
-
     cursor: nwse-resize;
-
     display: none;
-
     z-index: 20;
 }
 
@@ -116,11 +107,9 @@ html, body {
     position: fixed;
     top: 22px;
     left: 28px;
-
     font-size: 22px;
     font-weight: 600;
     letter-spacing: .5px;
-
     z-index: 30;
     pointer-events: none;
 }
@@ -130,12 +119,9 @@ html, body {
 
 .toolbar {
     position: fixed;
-
     left: 18px;
     top: 50%;
-
     transform: translateY(-50%);
-
     width: 58px;
     padding: 8px;
 
@@ -144,16 +130,13 @@ html, body {
     gap: 8px;
 
     background: rgba(30,30,30,.65);
-
     border: 1px solid rgba(255,255,255,.12);
-
     border-radius: 18px;
 
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
 
-    box-shadow:
-        0 10px 35px rgba(0,0,0,.35);
+    box-shadow: 0 10px 35px rgba(0,0,0,.35);
 
     z-index: 30;
 }
@@ -161,10 +144,8 @@ html, body {
 .tool-btn {
     width: 40px;
     height: 40px;
-
     border: 0;
     border-radius: 12px;
-
     background: transparent;
     color: white;
 
@@ -190,13 +171,89 @@ html, body {
 .tool-btn svg {
     width: 21px;
     height: 21px;
-
     stroke: white;
     fill: none;
-
     stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
+}
+
+
+/* COLOR BUTTON */
+
+.color-button {
+    position: relative;
+}
+
+.color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid rgba(255,255,255,.75);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.5);
+}
+
+
+/* COLOR PICKER */
+
+.color-picker {
+    position: fixed;
+    left: 86px;
+    top: 50%;
+
+    transform:
+        translateY(-50%)
+        translateX(-10px);
+
+    width: 230px;
+    padding: 16px;
+
+    background: rgba(25,25,25,.78);
+
+    border: 1px solid rgba(255,255,255,.12);
+
+    border-radius: 16px;
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.4);
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        opacity .2s ease,
+        transform .2s ease;
+
+    z-index: 29;
+}
+
+.color-picker.open {
+    opacity: 1;
+    pointer-events: auto;
+
+    transform:
+        translateY(-50%)
+        translateX(0);
+}
+
+.color-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.color-input {
+    width: 100%;
+    height: 50px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
 }
 
 
@@ -204,7 +261,6 @@ html, body {
 
 .settings-panel {
     position: fixed;
-
     left: 86px;
     top: 50%;
 
@@ -249,14 +305,12 @@ html, body {
 .settings-title {
     font-size: 14px;
     font-weight: 600;
-
     margin-bottom: 14px;
 }
 
 .setting-label {
     font-size: 12px;
     opacity: .7;
-
     margin-bottom: 7px;
 }
 
@@ -271,15 +325,12 @@ input[type="range"] {
 .setting-button,
 .click-me-btn {
     width: 100%;
-
     padding: 10px;
 
     border: 1px solid rgba(255,255,255,.12);
-
     border-radius: 10px;
 
     background: rgba(255,255,255,.06);
-
     color: white;
 
     cursor: pointer;
@@ -294,11 +345,8 @@ input[type="range"] {
 
 .mode-text {
     text-align: center;
-
     font-size: 11px;
-
     opacity: .55;
-
     margin-top: 8px;
 }
 
@@ -325,6 +373,20 @@ input[type="range"] {
     <!-- SIDEBAR -->
 
     <div class="toolbar">
+
+        <!-- COLOR -->
+
+        <button
+            class="tool-btn color-button"
+            id="colorBtn"
+            title="Color"
+        >
+            <span
+                class="color-dot"
+                id="colorDot"
+            ></span>
+        </button>
+
 
         <!-- ADD IMAGE -->
 
@@ -375,24 +437,13 @@ input[type="range"] {
             >
 
                 <path d="M12 2v20"></path>
-
                 <path d="M2 12h20"></path>
 
-                <path
-                    d="M8 6l4-4 4 4"
-                ></path>
+                <path d="M8 6l4-4 4 4"></path>
+                <path d="M8 18l4 4 4-4"></path>
 
-                <path
-                    d="M8 18l4 4 4-4"
-                ></path>
-
-                <path
-                    d="M6 8l-4 4 4 4"
-                ></path>
-
-                <path
-                    d="M18 8l4 4-4 4"
-                ></path>
+                <path d="M6 8l-4 4 4 4"></path>
+                <path d="M18 8l4 4-4 4"></path>
 
             </svg>
 
@@ -435,7 +486,7 @@ input[type="range"] {
                 ></circle>
 
                 <path
-                    d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.5v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6v-2.5h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L9 6.7l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V5h2.5v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1v2.5h-.1a1.7 1.7 0 0 0-1.5 1z"
+                    d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V20h-2.5v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6v-2.5h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1L9 6.7l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V5h2.5v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0-1.5 1z"
                 ></path>
 
             </svg>
@@ -445,7 +496,28 @@ input[type="range"] {
     </div>
 
 
-    <!-- SETTINGS PANEL -->
+    <!-- COLOR PICKER -->
+
+    <div
+        class="color-picker"
+        id="colorPicker"
+    >
+
+        <div class="color-title">
+            Drawing color
+        </div>
+
+        <input
+            class="color-input"
+            type="color"
+            id="colorInput"
+            value="#ffffff"
+        >
+
+    </div>
+
+
+    <!-- SETTINGS -->
 
     <div
         class="settings-panel"
@@ -587,41 +659,76 @@ const clickMeBtn =
     document.getElementById("clickMeBtn");
 
 
+/* COLOR */
+
+const colorBtn =
+    document.getElementById("colorBtn");
+
+const colorPicker =
+    document.getElementById("colorPicker");
+
+const colorInput =
+    document.getElementById("colorInput");
+
+const colorDot =
+    document.getElementById("colorDot");
+
+let drawColor =
+    "#ffffff";
+
+
 /* VARIABLES */
 
-let mode = "move";
+let mode =
+    "move";
 
-let brush = 5;
+let brush =
+    5;
 
-let selectedImage = null;
+let selectedImage =
+    null;
 
-let imageCounter = 0;
+let imageCounter =
+    0;
 
 
 /* MOVING */
 
-let movingImage = false;
+let movingImage =
+    false;
 
-let moveStartX = 0;
-let moveStartY = 0;
+let moveStartX =
+    0;
 
-let originalImageX = 0;
-let originalImageY = 0;
+let moveStartY =
+    0;
+
+let originalImageX =
+    0;
+
+let originalImageY =
+    0;
 
 
 /* RESIZING */
 
-let resizingImage = false;
+let resizingImage =
+    false;
 
-let resizeStartX = 0;
+let resizeStartX =
+    0;
 
-let resizeStartWidth = 0;
-let resizeStartHeight = 0;
+let resizeStartWidth =
+    0;
+
+let resizeStartHeight =
+    0;
 
 
 /* DRAWING */
 
-let drawing = false;
+let drawing =
+    false;
 
 
 /* CANVAS */
@@ -636,6 +743,7 @@ function resizeCanvas() {
 
     oldCanvas.height =
         drawCanvas.height;
+
 
     if (
         oldCanvas.width &&
@@ -672,6 +780,7 @@ function resizeCanvas() {
     }
 }
 
+
 resizeCanvas();
 
 
@@ -681,15 +790,52 @@ window.addEventListener(
 );
 
 
+/* COLOR PICKER */
+
+colorBtn.addEventListener(
+    "click",
+    () => {
+
+        colorPicker.classList.toggle(
+            "open"
+        );
+
+        settingsPanel.classList.remove(
+            "open"
+        );
+
+    }
+);
+
+
+colorInput.addEventListener(
+    "input",
+    () => {
+
+        drawColor =
+            colorInput.value;
+
+        colorDot.style.background =
+            drawColor;
+    }
+);
+
+
 /* MODE */
 
 function setMode(newMode) {
 
-    mode = newMode;
+    mode =
+        newMode;
 
-    movingImage = false;
-    resizingImage = false;
-    drawing = false;
+    movingImage =
+        false;
+
+    resizingImage =
+        false;
+
+    drawing =
+        false;
 
 
     if (mode === "draw") {
@@ -766,11 +912,15 @@ settingsBtn.addEventListener(
             "open"
         );
 
+        colorPicker.classList.remove(
+            "open"
+        );
+
     }
 );
 
 
-/* BRUSH */
+/* BRUSH SIZE */
 
 brushSize.addEventListener(
     "input",
@@ -862,16 +1012,24 @@ function createImage(src) {
         "resize-handle";
 
 
-    container.appendChild(img);
-    container.appendChild(handle);
+    container.appendChild(
+        img
+    );
+
+    container.appendChild(
+        handle
+    );
 
     imageLayer.appendChild(
         container
     );
 
 
-    container.dataset.x = "0";
-    container.dataset.y = "0";
+    container.dataset.x =
+        "0";
+
+    container.dataset.y =
+        "0";
 
 
     img.onload =
@@ -891,7 +1049,8 @@ function createImage(src) {
                 window.innerHeight * .7;
 
 
-            let scale = 1;
+            let scale =
+                1;
 
 
             if (width > maxWidth) {
@@ -983,7 +1142,7 @@ function updateImage(container) {
 }
 
 
-/* SELECT */
+/* SELECT IMAGE */
 
 function selectImage(container) {
 
@@ -1071,7 +1230,7 @@ function imagePointerDown(e) {
 }
 
 
-/* MOVE */
+/* MOVE IMAGE */
 
 document.addEventListener(
     "pointermove",
@@ -1127,6 +1286,7 @@ document.addEventListener(
     }
 );
 
+
 document.addEventListener(
     "pointercancel",
     () => {
@@ -1140,7 +1300,7 @@ document.addEventListener(
 );
 
 
-/* ---------------- RESIZE ---------------- */
+/* RESIZE START */
 
 function resizePointerDown(e) {
 
@@ -1170,16 +1330,17 @@ function resizePointerDown(e) {
         e.clientX;
 
 
-    resizeStartWidth =
+    const img =
         container.querySelector(
             ".image-object"
-        ).offsetWidth;
+        );
 
+
+    resizeStartWidth =
+        img.offsetWidth;
 
     resizeStartHeight =
-        container.querySelector(
-            ".image-object"
-        ).offsetHeight;
+        img.offsetHeight;
 
 
     try {
@@ -1192,7 +1353,7 @@ function resizePointerDown(e) {
 }
 
 
-/* RESIZE MOVE */
+/* RESIZE */
 
 document.addEventListener(
     "pointermove",
@@ -1222,43 +1383,25 @@ document.addEventListener(
             resizeStartX;
 
 
-        /*
-            Use the horizontal movement
-            to resize while keeping the
-            original aspect ratio.
-        */
-
-        let newWidth =
-            resizeStartWidth + dx;
-
-
         const aspectRatio =
             resizeStartHeight /
             resizeStartWidth;
 
 
+        let newWidth =
+            resizeStartWidth + dx;
+
+
+        if (newWidth < 40) {
+
+            newWidth =
+                40;
+        }
+
+
         let newHeight =
             newWidth *
             aspectRatio;
-
-
-        /*
-            Minimum size
-        */
-
-        const minSize =
-            40;
-
-
-        if (newWidth < minSize) {
-
-            newWidth =
-                minSize;
-
-            newHeight =
-                newWidth *
-                aspectRatio;
-        }
 
 
         img.style.width =
@@ -1285,17 +1428,15 @@ workspace.addEventListener(
         }
 
 
-        /*
-            Don't resize when
-            hovering over the sidebar.
-        */
-
         if (
             e.target.closest(
                 ".toolbar"
             ) ||
             e.target.closest(
                 ".settings-panel"
+            ) ||
+            e.target.closest(
+                ".color-picker"
             )
         ) {
             return;
@@ -1313,7 +1454,6 @@ workspace.addEventListener(
 
         let width =
             img.offsetWidth;
-
 
         let height =
             img.offsetHeight;
@@ -1357,7 +1497,7 @@ workspace.addEventListener(
 );
 
 
-/* ---------------- DRAWING ---------------- */
+/* DRAWING */
 
 drawCanvas.addEventListener(
     "pointerdown",
@@ -1403,7 +1543,7 @@ drawCanvas.addEventListener(
             "round";
 
         ctx.strokeStyle =
-            "#ffffff";
+            drawColor;
     }
 );
 
@@ -1521,7 +1661,9 @@ downloadBtn.addEventListener(
 
 
         const outputCtx =
-            output.getContext("2d");
+            output.getContext(
+                "2d"
+            );
 
 
         outputCtx.fillStyle =
@@ -1588,7 +1730,9 @@ downloadBtn.addEventListener(
 
 
         const link =
-            document.createElement("a");
+            document.createElement(
+                "a"
+            );
 
 
         link.download =
